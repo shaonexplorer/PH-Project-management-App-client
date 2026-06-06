@@ -22,6 +22,7 @@ import {
   BookOpenIcon,
   GearIcon,
 } from "@phosphor-icons/react";
+import { Projector } from "lucide-react";
 
 // This is sample data.
 const data = {
@@ -33,7 +34,7 @@ const data = {
   teams: [
     {
       name: "Acme Inc",
-      logo: <RowsIcon />,
+      logo: <Projector />,
       plan: "Enterprise",
     },
     {

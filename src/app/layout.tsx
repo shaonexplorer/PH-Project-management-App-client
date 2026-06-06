@@ -3,6 +3,8 @@ import { Geist, Geist_Mono, Instrument_Sans } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/modules/Theme/provider";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "sonner";
 
 const instrumentSans = Instrument_Sans({
   subsets: ["latin"],
@@ -48,6 +50,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <Toaster richColors />
           {children}
         </ThemeProvider>
       </body>

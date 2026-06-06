@@ -1,6 +1,8 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+
+import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -22,12 +24,16 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
+import { loginAction } from "@/actions/auth/login";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
   const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
 
   const loginSchema = z.object({
     email: z.email({ message: "Invalid email address" }),
@@ -42,9 +48,22 @@ export function LoginForm({
     formState: { errors },
   } = useForm({ resolver: zodResolver(loginSchema) });
 
-  const onSubmit = (data: { email: string; password: string }) => {
-    // TODO: integrate with authentication API
-    console.log("Login data:", data);
+  const mutation = useMutation({
+    mutationFn: loginAction,
+    onSuccess: () => {
+      // Invalidate and refetch
+      toast.success("Login successful!");
+      router.replace("/dashboard");
+    },
+    onError: (error) => {
+      toast.error((error as Error).message || "Login failed");
+    },
+  });
+
+  const onSubmit = async (data: { email: string; password: string }) => {
+    const result = await mutation.mutateAsync(data);
+
+    // console.log(result);
   };
 
   return (
@@ -108,7 +127,9 @@ export function LoginForm({
                 </>
               </Field>
               <Field>
-                <Button type="submit">Login</Button>
+                <Button disabled={mutation.isPending} type="submit">
+                  {mutation.isPending ? "Logging in..." : "Login"}
+                </Button>
                 <Button variant="outline" type="button">
                   Login with Google
                 </Button>
