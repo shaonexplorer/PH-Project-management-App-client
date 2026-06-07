@@ -1,3 +1,4 @@
+import { Card } from "@/components/ui/card";
 import React from "react";
 
 interface TaskCardProps {
@@ -33,16 +34,16 @@ export default function TaskCard({
   onUpdateStatus,
 }: TaskCardProps) {
   return (
-    <div className="hover:scale-[1.02] transition-transform duration-300">
+    <div className="hover:scale-[1.02] transition-transform duration-300 flex flex-col h-full">
       {/* Main Glass-morphism Card Frame */}
-      <div
-        className="bg-card rounded-2xl p-4 py-6 shadow-2xl transition-all duration-300 transform group-hover:-translate-y-1 group-hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-[#424754]/30"
+      <Card
+        className="bg-card flex flex-col h-full rounded-2xl p-4 py-6 shadow-2xl transition-all duration-300 transform group-hover:-translate-y-1 group-hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-[#424754]/30"
         style={{
           backdropFilter: "blur(12px)",
         }}
       >
         {/* Header Badge & Title Section */}
-        <div className="flex justify-between items-start mb-6">
+        <div className="flex justify-between items-start  h-[50px]">
           <div className="flex flex-row-reverse  flex-1">
             <div className="flex flex-1 items-center gap-2">
               {/* status */}
@@ -64,12 +65,12 @@ export default function TaskCard({
         </div>
 
         {/* Task Summary Description */}
-        <p className="text-sm md:text-base font-normal text-muted-foreground mb-4  ">
+        <p className="text-sm md:text-base font-normal text-muted-foreground  w-full overflow-hidden h-full lg:h-[120px] ">
           {description}
         </p>
 
         {/* Priority & Deadline Grid Matrix */}
-        <div className="flex gap-8 mb-6 border-b border-[#424754]/20">
+        <div className="flex gap-8  pb-2 border-b border-[#424754]/20">
           <div className="flex flex-col ">
             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
               Priority
@@ -115,19 +116,19 @@ export default function TaskCard({
           <div className="flex flex-col  items-center  gap-2 flex-1">
             <button
               onClick={onUpdateStatus}
-              className="w-full bg-primary text-primary-foreground px-4 py-1 rounded-xl text-sm font-semibold hover:bg-primary/80 transition-all active:scale-95 flex items-center justify-center gap-1 shadow-lg shadow-[#adc6ff]/10 whitespace-nowrap"
-            >
-              Assign Member
-            </button>
-            <button
-              onClick={onUpdateStatus}
               className="w-full bg-primary-foreground text-primary px-4 py-1 rounded-xl text-sm font-semibold hover:bg-primary-foreground/80 transition-all active:scale-95 flex items-center justify-center gap-1 shadow-lg shadow-[#adc6ff]/10 whitespace-nowrap"
             >
               Update Status
             </button>
+            <button
+              onClick={onUpdateStatus}
+              className="w-full bg-primary text-primary-foreground px-4 py-1 rounded-xl text-sm font-semibold hover:bg-primary/80 transition-all active:scale-95 flex items-center justify-center gap-1 shadow-lg shadow-[#adc6ff]/10 whitespace-nowrap"
+            >
+              Assign Member
+            </button>
           </div>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

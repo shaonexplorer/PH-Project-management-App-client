@@ -22,7 +22,7 @@ import {
   BookOpenIcon,
   GearIcon,
 } from "@phosphor-icons/react";
-import { Projector } from "lucide-react";
+import { LayoutDashboard, Projector, Workflow } from "lucide-react";
 
 // This is sample data.
 const data = {
@@ -50,90 +50,52 @@ const data = {
   ],
   navMain: [
     {
-      title: "Playground",
+      title: "Dashboard",
       url: "#",
-      icon: <TerminalIcon />,
+      icon: <LayoutDashboard />,
       isActive: true,
       items: [
         {
-          title: "History",
+          title: "Analytics",
+          url: "/dashboard",
+        },
+      ],
+    },
+    {
+      title: "Projects",
+      url: "#",
+      icon: <Workflow />,
+      isActive: true,
+      items: [
+        {
+          title: "projects",
           url: "/dashboard/projects",
         },
         {
-          title: "Starred",
+          title: "Tasks",
           url: "/dashboard/tasks",
         },
-        {
-          title: "Settings",
-          url: "#",
-        },
       ],
     },
-    {
-      title: "Models",
-      url: "#",
-      icon: <RobotIcon />,
-      items: [
-        {
-          title: "Genesis",
-          url: "#",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Documentation",
-      url: "#",
-      icon: <BookOpenIcon />,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: <GearIcon />,
-      items: [
-        {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
-        },
-      ],
-    },
+    // {
+    //   title: "Models",
+    //   url: "#",
+    //   icon: <RobotIcon />,
+    //   items: [
+    //     {
+    //       title: "Genesis",
+    //       url: "#",
+    //     },
+    //     {
+    //       title: "Explorer",
+    //       url: "#",
+    //     },
+    //     {
+    //       title: "Quantum",
+    //       url: "#",
+    //     },
+    //   ],
+    // },
   ],
 };
 
