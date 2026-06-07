@@ -57,11 +57,11 @@ const data = {
       items: [
         {
           title: "History",
-          url: "#",
+          url: "/dashboard/projects",
         },
         {
           title: "Starred",
-          url: "#",
+          url: "/dashboard/tasks",
         },
         {
           title: "Settings",

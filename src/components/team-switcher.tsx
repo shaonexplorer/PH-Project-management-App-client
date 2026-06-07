@@ -31,12 +31,14 @@ export function TeamSwitcher({
             size="lg"
             className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
           >
-            <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-              <Lightbulb />
+            <div className="flex aspect-square size-10 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+              <Lightbulb size={8} />
             </div>
             <div className="grid flex-1 text-left text-sm leading-tight">
-              <span className="truncate font-medium">Project Management</span>
-              <span className="truncate text-xs">Application</span>
+              <span className="truncate font-medium text-md">
+                Project Management
+              </span>
+              <span className="truncate text-sm">Application</span>
             </div>
           </SidebarMenuButton>
         </Link>
