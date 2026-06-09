@@ -175,13 +175,15 @@ export default function ProjectInfoCard({
                 {daysLeft} Days Left
               </span>
             </div>
-            <button
-              onClick={onViewDetails}
-              className="flex items-center gap-1 font-semibold dark:text-[#d3e4fe] text-primary hover:underline underline-offset-4 transform group-hover:translate-x-1 transition-transform duration-300"
-            >
-              Add Member
-              <Plus className="w-6 h-6 text-current" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={onViewDetails}
+                className="flex items-center gap-1 font-semibold dark:text-[#d3e4fe] text-primary hover:underline underline-offset-4 transform group-hover:translate-x-1 transition-transform duration-300"
+              >
+                Add Member
+                <Plus className="w-6 h-6 text-current" />
+              </button>
+            </div>
           </div>
         </div>
       </main>

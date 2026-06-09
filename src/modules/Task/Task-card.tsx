@@ -43,7 +43,7 @@ export default function TaskCard({
         }}
       >
         {/* Header Badge & Title Section */}
-        <div className="flex justify-between items-start  h-[50px]">
+        <div className="flex justify-between items-start  h-[50px] ">
           <div className="flex flex-row-reverse  flex-1">
             <div className="flex flex-1 items-center gap-2">
               {/* status */}
@@ -58,19 +58,19 @@ export default function TaskCard({
               </span>
             </div>
 
-            <h1 className="flex-1 mr-auto text-lg md:text-xl font-bold text-card-foreground tracking-tight leading-tight">
+            <h1 className="flex-1 mr-auto text-md md:text-lg font-bold text-card-foreground tracking-tight leading-tight">
               {title}
             </h1>
           </div>
         </div>
 
         {/* Task Summary Description */}
-        <p className="text-sm md:text-base font-normal text-muted-foreground  w-full overflow-hidden h-full lg:h-[120px] ">
+        <p className="text-sm md:text-base font-normal text-muted-foreground  w-full overflow-hidden h-full lg:h-[70px] -mt-3">
           {description}
         </p>
 
         {/* Priority & Deadline Grid Matrix */}
-        <div className="flex gap-8  pb-2 border-b border-[#424754]/20">
+        <div className="flex gap-8  pb-2 border-b border-[#424754]/20 -mt-3">
           <div className="flex flex-col ">
             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
               Priority

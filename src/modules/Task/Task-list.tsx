@@ -41,7 +41,7 @@ const mockTasks = [
     id: 6,
     title: "Write unit tests",
     description:
-      "Add Jest tests for the user service. lorem ipsum dolor sit amet. lorem ipsum dolor sit amet. lorem ipsum dolor sit amet. lorem ipsum dolor sit amet. lorem ipsum dolor sit amet. lorem ipsum dolor sit amet. lorem ipsum dolor sit amet. lorem ipsum dolor sit amet. lorem ipsum dolor sit amet.",
+      "Add Jest tests for the user service. lorem ipsum dolor sit amet. lorem ipsum dolor sit amet.",
     status: "completed",
   },
 ];
