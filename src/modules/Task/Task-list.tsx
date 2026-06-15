@@ -1,10 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
-import { Plus } from "lucide-react";
+import { useEffect, useState } from "react";
+
 import TaskCard from "./Task-card";
 import { Separator } from "@/components/ui/separator";
 import { SheetCreateTask } from "./create-task-sheet";
+import { useQuery } from "@tanstack/react-query";
+import { getMyTasks } from "@/actions/Tasks/get";
+import { getCookieByName } from "@/actions/auth/cookie";
 
 // Mock task data – replace with real API later
 const mockTasks = [
@@ -50,22 +53,36 @@ const mockTasks = [
 function TaskList() {
   const [searchTerm, setSearchTerm] = useState("");
 
+  const [user, setUser] = useState<string | null>(null);
+
+  useEffect(() => {
+    const getUser = async () => {
+      const id = await getCookieByName("userId");
+      setUser(id);
+    };
+
+    getUser();
+  }, []);
+
   const filteredTasks = mockTasks.filter(
     (t) =>
       t.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       t.description.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  const handleCreateTask = () => {
-    // TODO: Open modal or navigate to task creation page
-    console.log("Create task clicked");
-  };
-
   const statuses = [
     { key: "todo", label: "To Do" },
     { key: "in-progress", label: "In Progress" },
     { key: "completed", label: "Completed" },
   ];
+
+  const tasks = useQuery({
+    queryKey: ["my-tasks", user],
+    queryFn: () => getMyTasks(user as string),
+  });
+
+  // console.log({ tasks: tasks?.data?.tasks });
+  // console.log({ user });
 
   return (
     <div className="w-full p-4 bg-muted rounded-lg">
@@ -91,17 +108,22 @@ function TaskList() {
               {s.label}
             </h2>
             <div className="grid gap-4">
-              {filteredTasks
-                .filter((t) => t.status === s.key)
-                .map((task) => (
-                  <TaskCard
-                    key={task.id}
-                    title={task.title}
-                    description={task.description}
-                    // Placeholder callbacks – can be wired up later
-                    onUpdateStatus={() => console.log(`Update ${task.id}`)}
-                  />
-                ))}
+              {user &&
+                tasks?.data?.tasks
+                  .filter(
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    (t: any) => (t.status as string).toLowerCase() === s.key,
+                  )
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  .map((task: any) => (
+                    <TaskCard
+                      key={task.id}
+                      title={task.title}
+                      description={task.description}
+                      // Placeholder callbacks – can be wired up later
+                      onUpdateStatus={() => console.log(`Update ${task.id}`)}
+                    />
+                  ))}
             </div>
           </div>
         ))}

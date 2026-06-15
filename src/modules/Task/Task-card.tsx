@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import React from "react";
 
@@ -37,7 +38,7 @@ export default function TaskCard({
     <div className="hover:scale-[1.02] transition-transform duration-300 flex flex-col h-full">
       {/* Main Glass-morphism Card Frame */}
       <Card
-        className="bg-card flex flex-col h-full rounded-2xl p-4 py-6 shadow-2xl transition-all duration-300 transform group-hover:-translate-y-1 group-hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-[#424754]/30"
+        className="bg-card flex flex-col h-full rounded-2xl p-4 py-4 shadow-2xl transition-all duration-300 transform group-hover:-translate-y-1 group-hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-[#424754]/30"
         style={{
           backdropFilter: "blur(12px)",
         }}
@@ -70,7 +71,7 @@ export default function TaskCard({
         </p>
 
         {/* Priority & Deadline Grid Matrix */}
-        <div className="flex gap-8  pb-2 border-b border-[#424754]/20 -mt-3">
+        <div className="flex gap-8  pb-2 border-b border-[#424754]/20 -mt-4">
           <div className="flex flex-col ">
             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
               Priority
@@ -91,7 +92,7 @@ export default function TaskCard({
         </div>
 
         {/* Assignee Meta Footprint & Call To Action */}
-        <div className="flex items-end justify-between gap-8">
+        <div className="flex items-center justify-between gap-8 -mt-1">
           <div className="flex items-center gap-3 flex-1">
             <div className="relative flex-shrink-0">
               <img
@@ -114,18 +115,18 @@ export default function TaskCard({
           </div>
 
           <div className="flex flex-col  items-center  gap-2 flex-1">
-            <button
+            <Button
               onClick={onUpdateStatus}
-              className="w-full bg-primary-foreground text-primary px-4 py-1 rounded-xl text-sm font-semibold hover:bg-primary-foreground/80 transition-all active:scale-95 flex items-center justify-center gap-1 shadow-lg shadow-[#adc6ff]/10 whitespace-nowrap"
+              className="w-full bg-primary-foreground text-primary px-4 py-4 rounded-xl text-sm font-semibold hover:bg-primary-foreground/80 transition-all active:scale-95 flex items-center justify-center gap-1 shadow-lg shadow-[#adc6ff]/10 whitespace-nowrap"
             >
               Update Status
-            </button>
-            <button
+            </Button>
+            {/* <button
               onClick={onUpdateStatus}
               className="w-full bg-primary text-primary-foreground px-4 py-1 rounded-xl text-sm font-semibold hover:bg-primary/80 transition-all active:scale-95 flex items-center justify-center gap-1 shadow-lg shadow-[#adc6ff]/10 whitespace-nowrap"
             >
               Assign Member
-            </button>
+            </button> */}
           </div>
         </div>
       </Card>

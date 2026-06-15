@@ -28,16 +28,18 @@ import {
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { getTeamMembers } from "@/actions/team-member";
+import { getTeamMembersByProject } from "@/actions/team-member";
 import { useState } from "react";
 import { toast } from "sonner";
 import { createTaskAction } from "@/actions/Tasks/create";
+import { getMyProjects } from "@/actions/Project/get";
 
 // Zod schema for project creation
 const createProjectSchema = z.object({
   title: z.string().min(1, "Project name is required"),
   description: z.string().optional(),
   assignedMemberId: z.string().min(1, "Assign a member"),
+  projectId: z.string().min(1, "Assign a project"),
   deadline: z
     .string()
     .refine((val) => !isNaN(Date.parse(val)), { message: "Invalid date" }),
@@ -47,13 +49,14 @@ type CreateProjectForm = z.infer<typeof createProjectSchema>;
 
 export function SheetCreateTask() {
   const [open, setOpen] = useState(false);
+  const [project, setProject] = useState("");
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     setValue,
-    watch,
+    getValues,
   } = useForm<CreateProjectForm>({
     resolver: zodResolver(createProjectSchema),
     defaultValues: {
@@ -61,6 +64,7 @@ export function SheetCreateTask() {
       description: "",
       assignedMemberId: "",
       deadline: "",
+      projectId: "",
     },
   });
 
@@ -74,7 +78,7 @@ export function SheetCreateTask() {
       setOpen(false);
       toast.success("Project created succesfully");
 
-      queryClient.invalidateQueries({ queryKey: ["my-projects"] });
+      queryClient.invalidateQueries({ queryKey: ["my-tasks"] });
     },
     onError: (error) => {
       console.error("Error creating project:", error);
@@ -83,11 +87,25 @@ export function SheetCreateTask() {
   });
 
   const teamMembers = useQuery({
-    queryKey: ["team-member"],
-    queryFn: getTeamMembers,
+    queryKey: ["team-member-project", project],
+    queryFn: () => getTeamMembersByProject(project),
   });
 
+  // console.log({ project });
+
   const allMembers = teamMembers?.data?.members.map(
+    (m: { userId: string; name: string }) => ({
+      id: m.userId,
+      value: m.name,
+    }),
+  );
+
+  const projects = useQuery({
+    queryKey: ["user-project"],
+    queryFn: () => getMyProjects(),
+  });
+
+  const myProjects = projects?.data?.projects.map(
     (m: { id: string; name: string }) => ({
       id: m.id,
       value: m.name,
@@ -140,6 +158,36 @@ export function SheetCreateTask() {
               placeholder="Optional description"
               className="min-h-[80px] w-full rounded-md border border-input   px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             />
+          </div>
+
+          {/* Assign project */}
+          <div className="grid gap-3">
+            <Label htmlFor="project-member">Assign Project</Label>
+            <Select
+              onValueChange={(value) => {
+                setValue("projectId", value);
+                setProject(value);
+              }}
+              defaultValue=""
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a member" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {myProjects?.map((member: { id: string; value: string }) => (
+                    <SelectItem key={member.id} value={member.id}>
+                      {member.value}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+            {errors.assignedMemberId && (
+              <p className="text-sm text-red-500">
+                {errors.assignedMemberId.message}
+              </p>
+            )}
           </div>
 
           {/* Assign Member */}

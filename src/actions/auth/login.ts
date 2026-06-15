@@ -84,6 +84,17 @@ export async function loginAction(data: { email: string; password: string }) {
       // Example: 7‑day expiry
       maxAge: 60 * 60 * 24 * 7,
     });
+
+    (await cookies()).set({
+      name: "userId",
+      value: result.user?.id || "",
+      httpOnly: true,
+      path: "/",
+      sameSite: "lax",
+      secure: true,
+      // Example: 7‑day expiry
+      maxAge: 60 * 60 * 24 * 7,
+    });
   }
 
   return result;
