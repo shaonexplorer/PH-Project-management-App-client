@@ -1,8 +1,10 @@
 import React, { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { Plus } from "lucide-react";
+import { DialogAddMember } from "./Add-member-dialog";
 
 interface ProjectCardProps {
+  projectId: string;
   title?: string;
   projectLead?: {
     name: string;
@@ -16,6 +18,7 @@ interface ProjectCardProps {
 }
 
 export default function ProjectInfoCard({
+  projectId,
   title = "Global Brand Refresh",
   projectLead = {
     name: "Sarah Jenkins",
@@ -176,13 +179,7 @@ export default function ProjectInfoCard({
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <button
-                onClick={onViewDetails}
-                className="flex items-center gap-1 font-semibold dark:text-[#d3e4fe] text-primary hover:underline underline-offset-4 transform group-hover:translate-x-1 transition-transform duration-300"
-              >
-                Add Member
-                <Plus className="w-6 h-6 text-current" />
-              </button>
+              <DialogAddMember projectId={projectId} />
             </div>
           </div>
         </div>

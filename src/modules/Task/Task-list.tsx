@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Plus } from "lucide-react";
 import TaskCard from "./Task-card";
 import { Separator } from "@/components/ui/separator";
+import { SheetCreateTask } from "./create-task-sheet";
 
 // Mock task data – replace with real API later
 const mockTasks = [
@@ -70,13 +71,7 @@ function TaskList() {
     <div className="w-full p-4 bg-muted rounded-lg">
       {/* Header Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-        <button
-          onClick={handleCreateTask}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition"
-        >
-          <Plus className="w-5 h-5" />
-          Create Task
-        </button>
+        <SheetCreateTask />
         <input
           type="text"
           placeholder="Search tasks…"

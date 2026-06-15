@@ -117,6 +117,7 @@ function ProjectList() {
           );
           return (
             <ProjectInfoCard
+              projectId={project.id}
               key={project.id}
               title={project.name}
               projectLead={
