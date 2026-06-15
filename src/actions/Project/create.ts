@@ -27,6 +27,7 @@ export async function createProjectAction(data: {
     name: data.name,
     description: data.description,
     deadline: data.dueDate,
+    memberId: data.memberId,
   };
 
   const response = await fetch(`${apiUrl}/projects/create`, {

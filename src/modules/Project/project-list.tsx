@@ -13,6 +13,9 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { SheetCreateProject } from "./Create-Project-sheet";
+import { useQuery } from "@tanstack/react-query";
+import { getMyProjects } from "@/actions/Project/get";
+import { differenceInDays } from "date-fns";
 
 // Mock project data – replace with real API/data source later
 const mockProjects = [
@@ -66,10 +69,12 @@ function ProjectList() {
     return matchesSearch && matchesFilter;
   });
 
-  const handleCreateProject = () => {
-    // TODO: Open a modal or navigate to a create‑project page
-    console.log("Create project clicked");
-  };
+  const projects = useQuery({
+    queryKey: ["my-projects"],
+    queryFn: getMyProjects,
+  });
+
+  console.log({ projects: projects?.data?.projects });
 
   return (
     <div className="w-full p-4 bg-muted rounded-lg">
@@ -104,19 +109,32 @@ function ProjectList() {
 
       {/* Project cards grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-        {filteredProjects.map((project) => (
-          <ProjectInfoCard
-            key={project.id}
-            title={project.title}
-            projectLead={project.projectLead}
-            completionPercentage={project.completionPercentage}
-            daysLeft={project.daysLeft}
-            // Placeholder callbacks – can be wired up later
-            onEdit={() => console.log("Edit", project.id)}
-            onDelete={() => console.log("Delete", project.id)}
-            onViewDetails={() => console.log("View", project.id)}
-          />
-        ))}
+        {// eslint-disable-next-line @typescript-eslint/no-explicit-any
+        projects?.data?.projects.map((project: any) => {
+          const daysLeft = differenceInDays(
+            new Date(project.deadline),
+            new Date(),
+          );
+          return (
+            <ProjectInfoCard
+              key={project.id}
+              title={project.name}
+              projectLead={
+                project.projectLead || {
+                  name: project.members[0]?.name || "John Doe",
+                  avatarUrl:
+                    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150",
+                }
+              }
+              completionPercentage={project.completionPercentage || 50}
+              daysLeft={project.daysLeft || daysLeft}
+              // Placeholder callbacks – can be wired up later
+              onEdit={() => console.log("Edit", project.id)}
+              onDelete={() => console.log("Delete", project.id)}
+              onViewDetails={() => console.log("View", project.id)}
+            />
+          );
+        })}
       </div>
     </div>
   );

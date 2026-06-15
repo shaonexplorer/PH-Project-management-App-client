@@ -60,10 +60,10 @@ export default function ProjectInfoCard({
   return (
     <div className="hover:scale-[1.02] transition-transform duration-300">
       {/* Container Wrapper with initial opacity/transform for entrance */}
-      <main ref={cardRef} className=" max-h-fit w-full   ">
+      <main ref={cardRef} className=" w-full  h-full ">
         <div
           ref={innerCardRef}
-          className="relative bg-card rounded-2xl p-6 group transition-all duration-300 overflow-hidden style={{ border: '1px solid rgba(115, 118, 134, 0.1)' }}"
+          className="flex flex-col h-full relative bg-card rounded-2xl p-6 group transition-all duration-300 overflow-hidden style={{ border: '1px solid rgba(115, 118, 134, 0.1)' }}"
           style={{ transformStyle: "preserve-3d", perspective: "1000px" }}
         >
           {/* Hover Sweep Gradient Layer */}

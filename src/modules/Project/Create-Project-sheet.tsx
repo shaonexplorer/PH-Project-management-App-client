@@ -26,14 +26,17 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createProjectAction } from "@/actions/Project/create";
+import { getTeamMembers } from "@/actions/team-member";
+import { useState } from "react";
+import { toast } from "sonner";
 
 // Zod schema for project creation
 const createProjectSchema = z.object({
   name: z.string().min(1, "Project name is required"),
   description: z.string().optional(),
-  //   memberId: z.string().min(1, "Assign a member"),
+  memberId: z.string().min(1, "Assign a member"),
   dueDate: z
     .string()
     .refine((val) => !isNaN(Date.parse(val)), { message: "Invalid date" }),
@@ -41,14 +44,9 @@ const createProjectSchema = z.object({
 
 type CreateProjectForm = z.infer<typeof createProjectSchema>;
 
-// Mock members – replace with real data source later
-const mockMembers = [
-  { id: "1", name: "Alice Johnson" },
-  { id: "2", name: "Bob Smith" },
-  { id: "3", name: "Charlie Lee" },
-];
-
 export function SheetCreateProject() {
+  const [open, setOpen] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -60,21 +58,40 @@ export function SheetCreateProject() {
     defaultValues: {
       name: "",
       description: "",
-      //   memberId: "",
+      memberId: "",
       dueDate: "",
     },
   });
+
+  const queryClient = useQueryClient();
 
   const mutation = useMutation({
     mutationFn: (data: CreateProjectForm) => createProjectAction(data),
     onSuccess: (result) => {
       console.log("Project created successfully:", result);
       // Optionally close the sheet or reset form here
+      setOpen(false);
+      toast.success("Project created succesfully");
+
+      queryClient.invalidateQueries({ queryKey: ["my-projects"] });
     },
     onError: (error) => {
       console.error("Error creating project:", error);
+      toast.error(error.message || "Failed to create project");
     },
   });
+
+  const teamMembers = useQuery({
+    queryKey: ["team-member"],
+    queryFn: getTeamMembers,
+  });
+
+  const allMembers = teamMembers?.data?.members.map(
+    (m: { id: string; name: string }) => ({
+      id: m.id,
+      value: m.name,
+    }),
+  );
 
   const onSubmit = async (data: CreateProjectForm) => {
     const result = await mutation.mutateAsync(data);
@@ -82,7 +99,7 @@ export function SheetCreateProject() {
   };
 
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition">
           <Plus className="w-5 h-5" />
@@ -125,8 +142,8 @@ export function SheetCreateProject() {
           </div>
 
           {/* Assign Member */}
-          {/* <div className="grid gap-3">
-            <Label htmlFor="project-member">Assign Member</Label>
+          <div className="grid gap-3">
+            <Label htmlFor="project-member">Project Lead</Label>
             <Select
               onValueChange={(value) => setValue("memberId", value)}
               defaultValue=""
@@ -136,9 +153,9 @@ export function SheetCreateProject() {
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  {mockMembers.map((member) => (
+                  {allMembers?.map((member: { id: string; value: string }) => (
                     <SelectItem key={member.id} value={member.id}>
-                      {member.name}
+                      {member.value}
                     </SelectItem>
                   ))}
                 </SelectGroup>
@@ -147,7 +164,7 @@ export function SheetCreateProject() {
             {errors.memberId && (
               <p className="text-sm text-red-500">{errors.memberId.message}</p>
             )}
-          </div> */}
+          </div>
 
           {/* Due Date */}
           <div className="grid gap-3">
