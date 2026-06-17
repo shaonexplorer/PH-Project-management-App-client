@@ -38,6 +38,7 @@ import { getMyProjects } from "@/actions/Project/get";
 const createProjectSchema = z.object({
   title: z.string().min(1, "Project name is required"),
   description: z.string().optional(),
+  priority: z.string().optional(),
   assignedMemberId: z.string().min(1, "Assign a member"),
   projectId: z.string().min(1, "Assign a project"),
   deadline: z
@@ -65,6 +66,7 @@ export function SheetCreateTask() {
       assignedMemberId: "",
       deadline: "",
       projectId: "",
+      priority: "",
     },
   });
 
@@ -111,6 +113,12 @@ export function SheetCreateTask() {
       value: m.name,
     }),
   );
+
+  const priorityLevels = [
+    { value: "Low", name: "Low" },
+    { value: "Medium", name: "Medium" },
+    { value: "High", name: "High" },
+  ];
 
   const onSubmit = async (data: CreateProjectForm) => {
     const result = await mutation.mutateAsync(data);
@@ -171,7 +179,7 @@ export function SheetCreateTask() {
               defaultValue=""
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select a member" />
+                <SelectValue placeholder="Select a project" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
@@ -194,6 +202,7 @@ export function SheetCreateTask() {
           <div className="grid gap-3">
             <Label htmlFor="project-member">Assign Member</Label>
             <Select
+              disabled={project.length == 0}
               onValueChange={(value) => setValue("assignedMemberId", value)}
               defaultValue=""
             >
@@ -207,6 +216,38 @@ export function SheetCreateTask() {
                       {member.value}
                     </SelectItem>
                   ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+            {errors.assignedMemberId && (
+              <p className="text-sm text-red-500">
+                {errors.assignedMemberId.message}
+              </p>
+            )}
+          </div>
+
+          {/* Add priority */}
+          <div className="grid gap-3">
+            <Label htmlFor="project-member">Priority</Label>
+            <Select
+              onValueChange={(value) => {
+                setValue("priority", value);
+                setProject(value);
+              }}
+              defaultValue=""
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select priority" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {priorityLevels?.map(
+                    (member: { name: string; value: string }) => (
+                      <SelectItem key={member.value} value={member.value}>
+                        {member.name}
+                      </SelectItem>
+                    ),
+                  )}
                 </SelectGroup>
               </SelectContent>
             </Select>

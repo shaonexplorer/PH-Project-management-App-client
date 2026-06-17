@@ -1,8 +1,12 @@
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import React from "react";
+
+import { format } from "date-fns";
+
+import { UpdateTaskDialog } from "./Update-Task-Dialog";
 
 interface TaskCardProps {
+  taskId: string;
+  taskStatus: string;
   title?: string;
   description?: string;
   difficulty?: "Low" | "Medium" | "High";
@@ -11,14 +15,15 @@ interface TaskCardProps {
   lastUpdated?: string;
   assignee?: {
     name: string;
-    role: string;
-    avatarUrl: string;
+    role?: string;
+    avatarUrl?: string;
     isOnline?: boolean;
   };
   onUpdateStatus?: () => void;
 }
 
 export default function TaskCard({
+  taskId,
   title = "Implement OAuth Authentication",
   description = "Integrate robust security protocols using OAuth 2.0. Ensure multi-provider support including GitHub and Google, with full refresh token rotation logic for enhanced session security.",
   difficulty = "High",
@@ -33,6 +38,7 @@ export default function TaskCard({
     isOnline: true,
   },
   onUpdateStatus,
+  taskStatus,
 }: TaskCardProps) {
   return (
     <div className="hover:scale-[1.02] transition-transform duration-300 flex flex-col h-full">
@@ -55,7 +61,7 @@ export default function TaskCard({
                 >
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
                 </svg>
-                In Progress
+                {taskStatus.split("_").join(" ")}
               </span>
             </div>
 
@@ -78,7 +84,7 @@ export default function TaskCard({
             </span>
             <span className="text-sm md:text-base text-orange-500/70 flex items-center gap-2 font-medium">
               <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
-              High
+              {priority}
             </span>
           </div>
           <div className="flex flex-col  ml-auto sm:ml-0">
@@ -86,7 +92,7 @@ export default function TaskCard({
               Deadline
             </span>
             <span className="text-sm md:text-base text-card-foreground font-medium">
-              {deadline}
+              {format(deadline, "PP")}
             </span>
           </div>
         </div>
@@ -115,12 +121,7 @@ export default function TaskCard({
           </div>
 
           <div className="flex flex-col  items-center  gap-2 flex-1">
-            <Button
-              onClick={onUpdateStatus}
-              className="w-full bg-primary-foreground text-primary px-4 py-4 rounded-xl text-sm font-semibold hover:bg-primary-foreground/80 transition-all active:scale-95 flex items-center justify-center gap-1 shadow-lg shadow-[#adc6ff]/10 whitespace-nowrap"
-            >
-              Update Status
-            </Button>
+            <UpdateTaskDialog taskId={taskId} currentStatus={taskStatus} />
             {/* <button
               onClick={onUpdateStatus}
               className="w-full bg-primary text-primary-foreground px-4 py-1 rounded-xl text-sm font-semibold hover:bg-primary/80 transition-all active:scale-95 flex items-center justify-center gap-1 shadow-lg shadow-[#adc6ff]/10 whitespace-nowrap"

@@ -71,9 +71,9 @@ function TaskList() {
   );
 
   const statuses = [
-    { key: "todo", label: "To Do" },
-    { key: "in-progress", label: "In Progress" },
-    { key: "completed", label: "Completed" },
+    { key: "Todo", label: "To Do" },
+    { key: "In_Progress", label: "In Progress" },
+    { key: "Completed", label: "Completed" },
   ];
 
   const tasks = useQuery({
@@ -81,7 +81,7 @@ function TaskList() {
     queryFn: () => getMyTasks(user as string),
   });
 
-  // console.log({ tasks: tasks?.data?.tasks });
+  console.log({ tasks: tasks?.data?.tasks });
   // console.log({ user });
 
   return (
@@ -112,14 +112,25 @@ function TaskList() {
                 tasks?.data?.tasks
                   .filter(
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    (t: any) => (t.status as string).toLowerCase() === s.key,
+                    (t: any) => (t.status as string) === s.key,
                   )
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   .map((task: any) => (
                     <TaskCard
+                      taskId={task.id}
+                      taskStatus={task.status}
+                      deadline={task.dueDate}
                       key={task.id}
                       title={task.title}
                       description={task.description}
+                      priority={task.priority}
+                      assignee={{
+                        name: "Sarah Jenkins",
+                        role: "Lead Engineer",
+                        avatarUrl:
+                          "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150",
+                        isOnline: true,
+                      }}
                       // Placeholder callbacks – can be wired up later
                       onUpdateStatus={() => console.log(`Update ${task.id}`)}
                     />
