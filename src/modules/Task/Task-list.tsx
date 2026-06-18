@@ -125,7 +125,7 @@ function TaskList() {
                       description={task.description}
                       priority={task.priority}
                       assignee={{
-                        name: "Sarah Jenkins",
+                        name: task.assignee.name,
                         role: "Lead Engineer",
                         avatarUrl:
                           "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150",

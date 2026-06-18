@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import gsap from "gsap";
-import { Plus } from "lucide-react";
+import { Plus, User } from "lucide-react";
 import { DialogAddMember } from "./Add-member-dialog";
 
 interface ProjectCardProps {
@@ -125,11 +125,12 @@ export default function ProjectInfoCard({
           {/* Member Meta Information */}
           <div className="flex items-center gap-4">
             <div className="relative w-12 h-12">
-              <img
+              {/* <img
                 alt={projectLead.name}
                 className="w-full h-full object-cover rounded-full border-2 border-secondary"
                 src={projectLead.avatarUrl}
-              />
+              /> */}
+              <User className="w-[50px] h-[50px]" />
               <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#006c49] rounded-full border-2 border-primary" />
             </div>
             <div>

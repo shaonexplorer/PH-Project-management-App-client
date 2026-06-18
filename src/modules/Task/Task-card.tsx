@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { format } from "date-fns";
 
 import { UpdateTaskDialog } from "./Update-Task-Dialog";
+import { User } from "lucide-react";
 
 interface TaskCardProps {
   taskId: string;
@@ -101,11 +102,12 @@ export default function TaskCard({
         <div className="flex items-center justify-between gap-8 -mt-1">
           <div className="flex items-center gap-3 flex-1">
             <div className="relative flex-shrink-0">
-              <img
+              {/* <img
                 alt={assignee.name}
                 className="w-10 h-10 rounded-full border-2 border-[#adc6ff]/20 object-cover"
                 src={assignee.avatarUrl}
-              />
+              /> */}
+              <User className="w-[28px] h-[28px]" />
               {assignee.isOnline && (
                 <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-[#1d2027] rounded-full" />
               )}
@@ -115,7 +117,7 @@ export default function TaskCard({
                 {assignee.name}
               </span>
               <span className="text-xs text-muted-foreground truncate">
-                {assignee.role}
+                Team Member
               </span>
             </div>
           </div>
