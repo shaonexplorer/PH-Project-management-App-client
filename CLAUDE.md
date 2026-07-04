@@ -9,7 +9,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Build for production**: `npm run build`
 - **Run production server**: `npm start`
 - **Run linting**: `npm run lint`
-- **Run a single test**: *(no test script is defined; add a test runner like Jest or Vitest and then use `npm test -- <path>`)*
 
 These commands are defined in `package.json` under the `scripts` section.
 
@@ -25,6 +24,7 @@ These commands are defined in `package.json` under the `scripts` section.
 - **State / Domain Modules**: Business‑logic modules are under `src/modules/`.
   - `Theme/provider.tsx` – wraps the app with `next-themes` to enable dark/light mode.
   - `auth/` – contains `Login-form.tsx` and `Signup-Form.tsx` components used by the authentication routes.
+  - `Task/` – contains task-related components including the Kanban board implementation.
 - **Utilities**: Helper functions are in `src/lib/` (e.g., `utils.ts` for class name merging). The `cn` utility is imported in the root layout.
 - **Styling**: Tailwind CSS (v4) with `globals.css` for base styles. The project uses `tailwind-merge` to combine class strings safely.
 - **Icons**: Icons are provided by `@phosphor-icons/react` and `lucide-react`.
@@ -45,15 +45,57 @@ src/
 │   ├─ ui/              # shadcn primitives (button, input, …)
 │   ├─ app-sidebar.tsx
 │   └─ nav-*.tsx        # Navigation components
-├─ modules/             # Feature‑level modules (auth, theme, …)
-│   └─ Theme/provider.tsx
+├─ modules/             # Feature‑level modules (auth, theme, task, …)
+│   └─ Task/            # Task management module
+│       ├─ Task-list.tsx      # Kanban board implementation
+│       ├─ Task-card.tsx      # Individual task card component
+│       ├─ Update-Task-Dialog.tsx  # Dialog for updating task status
+│       └─ create-task-sheet.tsx   # Sheet for creating new tasks
 ├─ lib/                 # Utility functions
 └─ styles/ (globals.css)
 ```
 
+## Kanban Board Implementation (dnd-kit)
+
+The Kanban board in `src/modules/Task/Task-list.tsx` uses **dnd-kit** for drag-and-drop functionality. Key components:
+
+### Dependencies Installed
+```bash
+npm install @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities @dnd-kit/dom
+```
+
+### Key Concepts
+
+1. **DndContext** - The root provider for drag-and-drop functionality
+2. **SortableContext** - Makes a list of items sortable
+3. **useSortable** - Hook for making individual items draggable
+4. **useDroppable** - Hook for making areas droppable (columns)
+5. **Sensors** - Input sensors (PointerSensor for mouse/touch, KeyboardSensor for accessibility)
+
+### Components
+
+- **SortableTaskCard** - Individual task card that is draggable
+- **SortableColumn** - Column container that is a droppable area
+- **TaskList** - Main component that orchestrates the drag-and-drop
+
+### Status Columns
+- `Todo` (📋) - Tasks that need to be done
+- `In_Progress` (🚧) - Tasks currently being worked on
+- `Completed` (✅) - Finished tasks
+
+### Drag and Drop Flow
+1. User drags a task card
+2. The `handleDragStart` captures the active task
+3. User drops on a column (detected via `useDroppable`)
+4. The `handleDragEnd` updates the task status via the `updateTask` API mutation
+
+### Accessibility
+- Keyboard navigation supported via `KeyboardSensor`
+- Screen reader announcements via dnd-kit's built-in accessibility features
+
 ## Project‑Specific Hooks / Rules
 - There are no `.cursor` or Copilot rule files in this repository, so no special linting or AI‑assistant configurations need to be considered.
-- The `README.md` already contains the basic “Getting Started” instructions; the commands above are derived from it and `package.json`.
+- The `README.md` already contains the basic "Getting Started" instructions; the commands above are derived from it and `package.json`.
 
 ## Future Claude Code Usage
 - When performing code changes, prefer editing existing components under `src/components/ui/` or adding new feature modules under `src/modules/`.
@@ -63,4 +105,4 @@ src/
 
 ---
 
-*Generated on 2026‑06‑07*
+*Generated on 2026-06-07*
