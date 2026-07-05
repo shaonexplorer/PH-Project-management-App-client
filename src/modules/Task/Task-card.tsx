@@ -56,14 +56,18 @@ export default function TaskCard({
 }: TaskCardProps) {
   // Status color mapping
   const getStatusColors = (status: string) => {
-    if (status === "Completed") return {
-      badge: "bg-status-completed/15 text-status-completed border-status-completed/30",
-      accent: "bg-status-completed",
-    };
-    if (status === "In_Progress") return {
-      badge: "bg-status-inprogress/15 text-status-inprogress border-status-inprogress/30",
-      accent: "bg-status-inprogress",
-    };
+    if (status === "Completed")
+      return {
+        badge:
+          "bg-status-completed/15 text-status-completed border-status-completed/30",
+        accent: "bg-status-completed",
+      };
+    if (status === "In_Progress")
+      return {
+        badge:
+          "bg-status-inprogress/15 text-status-inprogress border-status-inprogress/30",
+        accent: "bg-status-inprogress",
+      };
     return {
       badge: "bg-status-todo/15 text-status-todo border-status-todo/30",
       accent: "bg-status-todo",
@@ -75,26 +79,33 @@ export default function TaskCard({
   return (
     <div className="hover:scale-[1.01] transition-all duration-200 flex flex-col h-full">
       {/* Main Card Frame */}
-      <Card className={cn(
-        "bg-card flex flex-col h-full p-4 shadow-lg",
-        "transition-all duration-300 border",
-        "hover:shadow-xl hover:shadow-black/5",
-        "border-border/50",
-      )}>
+      <Card
+        className={cn(
+          "bg-card flex flex-col h-full p-4 shadow-lg",
+          "transition-all duration-300 border",
+          "hover:shadow-xl hover:shadow-black/5",
+          "border-border/50",
+          "overflow-hidden relative",
+        )}
+      >
         {/* Accent Bar - positioned inside card with overflow-hidden clipping */}
-        <div className={cn(
-          "absolute top-0 left-0 bottom-0 w-0.5",
-          statusColors.accent,
-          "rounded-l-xl",
-          "z-0",
-        )}></div>
+        <div
+          className={cn(
+            "absolute top-0 left-0 bottom-0 w-0.5",
+            statusColors.accent,
+            "rounded-l-xl",
+            "z-0",
+          )}
+        ></div>
 
         {/* Header Section with Status Badge */}
         <div className="flex items-start gap-3 mb-2 relative">
-          <span className={cn(
-            "w-fit inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border",
-            statusColors.badge
-          )}>
+          <span
+            className={cn(
+              "w-fit inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border",
+              statusColors.badge,
+            )}
+          >
             {taskStatus.split("_").join(" ")}
           </span>
           <h2 className="text-sm font-bold text-card-foreground leading-tight line-clamp-2">
@@ -111,15 +122,19 @@ export default function TaskCard({
         <div className="flex items-center justify-between gap-3 mb-3">
           {/* Priority Indicator */}
           <div className="flex items-center gap-2">
-            <div className={cn(
-              "w-2 h-2 rounded-full",
-              priorityBgColors[priority].replace("bg-", "bg-")
-            )}></div>
-            <span className={cn(
-              "text-xs font-medium px-2 py-0.5 rounded-full",
-              "bg-muted/50 text-muted-foreground",
-              priorityColors[priority]
-            )}>
+            <div
+              className={cn(
+                "w-2 h-2 rounded-full",
+                priorityBgColors[priority].replace("bg-", "bg-"),
+              )}
+            ></div>
+            <span
+              className={cn(
+                "text-xs font-medium px-2 py-0.5 rounded-full",
+                "bg-muted/50 text-muted-foreground",
+                priorityColors[priority],
+              )}
+            >
               {priority}
             </span>
           </div>

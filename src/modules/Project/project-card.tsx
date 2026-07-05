@@ -77,7 +77,7 @@ export default function ProjectInfoCard({
 
           {/* Title & Actions Row */}
           <div className="flex justify-between items-center mb-2">
-            <h1 className="text-lg font-semibold text-card-foreground/80 tracking-tight">
+            <h1 className="text-base font-semibold text-card-foreground/80 tracking-tight">
               {title}
             </h1>
             <div className="flex gap-2">
@@ -134,7 +134,7 @@ export default function ProjectInfoCard({
               <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#006c49] rounded-full border-2 border-primary" />
             </div>
             <div>
-              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 Project Lead
               </p>
               <p className="text-md font-semibold text-card-foreground">
@@ -146,10 +146,10 @@ export default function ProjectInfoCard({
           {/* Progress Velocity Gauge Section */}
           <div className="space-y-2 mb-6">
             <div className="flex justify-between items-end">
-              <p className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider">
+              <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
                 Current Velocity
               </p>
-              <p className="text-lg font-semibold text-orange-300">
+              <p className="text-base font-semibold text-orange-300">
                 {completionPercentage}% Complete
               </p>
             </div>
@@ -175,7 +175,7 @@ export default function ProjectInfoCard({
                   clipRule="evenodd"
                 />
               </svg>
-              <span className="text-[12px] font-semibold">
+              <span className="text-sm font-semibold">
                 {daysLeft} Days Left
               </span>
             </div>
