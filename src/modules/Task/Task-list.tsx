@@ -19,6 +19,7 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  DragStartEvent,
   DragEndEvent,
   DragOverlay,
   useDroppable,
@@ -158,10 +159,14 @@ function SortableColumn({
     >
       {/* Column Header */}
       <div className="p-4 border-b border-border/50">
-        <h2 className={`text-lg font-semibold flex items-center gap-2 ${config.color}`}>
+        <h2
+          className={`text-lg font-semibold flex items-center gap-2 ${config.color}`}
+        >
           <span className="text-2xl">{config.icon}</span>
           <span>{config.label}</span>
-          <span className={`ml-auto text-xs font-medium px-2.5 py-1 rounded-full ${config.bg} ${config.color}`}>
+          <span
+            className={`ml-auto text-xs font-medium px-2.5 py-1 rounded-full ${config.bg} ${config.color}`}
+          >
             {tasks.length}
           </span>
         </h2>
@@ -260,7 +265,7 @@ function TaskList() {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8,
+        distance: 3,
       },
     }),
     useSensor(KeyboardSensor, {
@@ -269,7 +274,7 @@ function TaskList() {
   );
 
   // Handle drag start
-  const handleDragStart = (event: DragEndEvent) => {
+  const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
     const taskId = active.id as string;
 
@@ -384,26 +389,24 @@ function TaskList() {
         </div>
 
         {/* Drag Overlay */}
-        <DragOverlay>
+        <DragOverlay dropAnimation={null}>
           {draggedTask ? (
-            <div className="shadow-2xl">
-              <TaskCard
-                taskId={draggedTask.id}
-                taskStatus={draggedTask.status}
-                deadline={draggedTask.dueDate}
-                title={draggedTask.title}
-                description={draggedTask.description}
-                priority={draggedTask.priority}
-                assignee={{
-                  name: draggedTask.assignee?.name || "Unassigned",
-                  role: draggedTask.assignee?.role || "Team Member",
-                  avatarUrl:
-                    draggedTask.assignee?.avatarUrl ||
-                    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150",
-                  isOnline: draggedTask.assignee?.isOnline ?? false,
-                }}
-              />
-            </div>
+            <TaskCard
+              taskId={draggedTask.id}
+              taskStatus={draggedTask.status}
+              deadline={draggedTask.dueDate}
+              title={draggedTask.title}
+              description={draggedTask.description}
+              priority={draggedTask.priority}
+              assignee={{
+                name: draggedTask.assignee?.name || "Unassigned",
+                role: draggedTask.assignee?.role || "Team Member",
+                avatarUrl:
+                  draggedTask.assignee?.avatarUrl ||
+                  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150",
+                isOnline: draggedTask.assignee?.isOnline ?? false,
+              }}
+            />
           ) : null}
         </DragOverlay>
 
@@ -411,13 +414,15 @@ function TaskList() {
         <div className="mt-6 pt-4 border-t border-border/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm text-muted-foreground">
           <div className="flex items-center gap-4">
             <span>
-              Total tasks: <strong className="text-foreground font-medium">
+              Total tasks:{" "}
+              <strong className="text-foreground font-medium">
                 {apiTasks.length}
               </strong>
             </span>
             {searchTerm && (
               <span>
-                Filtered: <strong className="text-foreground font-medium">
+                Filtered:{" "}
+                <strong className="text-foreground font-medium">
                   {filteredTasks.length}
                 </strong>
               </span>
@@ -426,7 +431,9 @@ function TaskList() {
           <div className="flex items-center gap-4">
             {Object.entries(statusConfig).map(([key, config]) => (
               <div key={key} className="flex items-center gap-1.5">
-                <div className={`w-2 h-2 rounded-full ${config.color.replace("text-", "bg-")}`}></div>
+                <div
+                  className={`w-2 h-2 rounded-full ${config.color.replace("text-", "bg-")}`}
+                ></div>
                 <span className="text-xs">{config.label}</span>
               </div>
             ))}
