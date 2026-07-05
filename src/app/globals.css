@@ -89,6 +89,9 @@
   --color-status-inprogress: #F59E0B;
   --color-status-completed: #10B981;
   --color-board-gray: #F3F4F6;
+
+  /* Chart tooltip background for light mode */
+  --tooltip-bg: hsl(0 0% 100%);
 }
 
 .dark {
@@ -131,6 +134,9 @@
   --color-status-inprogress: #FBBF24;
   --color-status-completed: #34D399;
   --color-board-gray: #1F2937;
+
+  /* Chart tooltip background for dark mode */
+  --tooltip-bg: hsl(0 0% 15%);
 }
 
 @layer base {
