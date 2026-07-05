@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Plus } from "lucide-react";
 import ProjectInfoCard from "./project-card";
+import { ProjectCardSkeleton } from "./project-card-skeleton";
 import {
   Select,
   SelectContent,
@@ -109,33 +110,40 @@ function ProjectList() {
 
       {/* Project cards grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-        {// eslint-disable-next-line @typescript-eslint/no-explicit-any
-        projects?.data?.projects.map((project: any) => {
-          const daysLeft = differenceInDays(
-            new Date(project.deadline),
-            new Date(),
-          );
-          return (
-            <ProjectInfoCard
-              projectId={project.id}
-              key={project.id}
-              title={project.name}
-              projectLead={
-                project.projectLead || {
-                  name: project.members[0]?.name || "John Doe",
-                  avatarUrl:
-                    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150",
+        {projects.isLoading ? (
+          // Show skeleton loaders while loading
+          Array.from({ length: 6 }).map((_, index) => (
+            <ProjectCardSkeleton key={index} />
+          ))
+        ) : (
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          projects?.data?.projects.map((project: any) => {
+            const daysLeft = differenceInDays(
+              new Date(project.deadline),
+              new Date(),
+            );
+            return (
+              <ProjectInfoCard
+                projectId={project.id}
+                key={project.id}
+                title={project.name}
+                projectLead={
+                  project.projectLead || {
+                    name: project.members[0]?.name || "John Doe",
+                    avatarUrl:
+                      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150",
+                  }
                 }
-              }
-              completionPercentage={project.completionPercentage || 50}
-              daysLeft={project.daysLeft || daysLeft}
-              // Placeholder callbacks – can be wired up later
-              onEdit={() => console.log("Edit", project.id)}
-              onDelete={() => console.log("Delete", project.id)}
-              onViewDetails={() => console.log("View", project.id)}
-            />
-          );
-        })}
+                completionPercentage={project.completionPercentage || 50}
+                daysLeft={project.daysLeft || daysLeft}
+                // Placeholder callbacks – can be wired up later
+                onEdit={() => console.log("Edit", project.id)}
+                onDelete={() => console.log("Delete", project.id)}
+                onViewDetails={() => console.log("View", project.id)}
+              />
+            );
+          })
+        )}
       </div>
     </div>
   );

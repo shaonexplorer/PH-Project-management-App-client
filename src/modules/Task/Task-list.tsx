@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import TaskCard from "./Task-card";
+import { TaskCardSkeleton } from "./task-card-skeleton";
 import { Separator } from "@/components/ui/separator";
 import { SheetCreateTask } from "./create-task-sheet";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -134,10 +135,12 @@ function SortableColumn({
   status,
   config,
   tasks,
+  isLoading,
 }: {
   status: StatusKey;
   config: (typeof statusConfig)[StatusKey];
   tasks: KanbanTask[];
+  isLoading?: boolean;
 }) {
   // Make the entire column a droppable area
   const { setNodeRef, isOver } = useDroppable({
@@ -173,7 +176,13 @@ function SortableColumn({
         strategy={verticalListSortingStrategy}
       >
         <div className="flex-1 p-4 space-y-3">
-          {tasks.length === 0 ? (
+          {isLoading ? (
+            <div className="space-y-3">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <TaskCardSkeleton key={index} />
+              ))}
+            </div>
+          ) : tasks.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <div className="text-4xl mb-3 opacity-40">📭</div>
               <p className="text-sm">Drop task here</p>
@@ -368,6 +377,7 @@ function TaskList() {
                 status={status}
                 config={config}
                 tasks={tasksInColumn}
+                isLoading={tasks.isLoading}
               />
             );
           })}
