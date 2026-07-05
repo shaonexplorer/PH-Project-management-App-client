@@ -49,6 +49,7 @@
 }
 
 :root {
+  /* Original shadcn/ui design tokens */
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.148 0.004 228.8);
   --popover: oklch(1 0 0);
@@ -81,9 +82,17 @@
   --sidebar-ring: oklch(0.723 0.014 214.4);
   --background: oklch(1 0 0);
   --foreground: oklch(0.148 0.004 228.8);
+
+  /* Project Management App custom colors */
+  --color-project-blue: #3B82F6;
+  --color-status-todo: #6B7280;
+  --color-status-inprogress: #F59E0B;
+  --color-status-completed: #10B981;
+  --color-board-gray: #F3F4F6;
 }
 
 .dark {
+  /* Original shadcn/ui design tokens */
   --background: oklch(0.148 0.004 228.8);
   --foreground: oklch(0.987 0.002 197.1);
   --card: oklch(0.218 0.008 223.9);
@@ -115,6 +124,13 @@
   --sidebar-accent-foreground: oklch(0.987 0.002 197.1);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.56 0.021 213.5);
+
+  /* Project Management App custom colors (dark mode variants) */
+  --color-project-blue: #60A5FA;
+  --color-status-todo: #9CA3AF;
+  --color-status-inprogress: #FBBF24;
+  --color-status-completed: #34D399;
+  --color-board-gray: #1F2937;
 }
 
 @layer base {
@@ -126,5 +142,81 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+/* Tailwind color utilities for custom colors */
+@layer utilities {
+  .text-project-blue {
+    color: var(--color-project-blue);
+  }
+  .bg-project-blue {
+    background-color: var(--color-project-blue);
+  }
+  .border-project-blue {
+    border-color: var(--color-project-blue);
+  }
+  .text-status-todo {
+    color: var(--color-status-todo);
+  }
+  .bg-status-todo {
+    background-color: var(--color-status-todo);
+  }
+  .border-status-todo {
+    border-color: var(--color-status-todo);
+  }
+  .text-status-inprogress {
+    color: var(--color-status-inprogress);
+  }
+  .bg-status-inprogress {
+    background-color: var(--color-status-inprogress);
+  }
+  .border-status-inprogress {
+    border-color: var(--color-status-inprogress);
+  }
+  .text-status-completed {
+    color: var(--color-status-completed);
+  }
+  .bg-status-completed {
+    background-color: var(--color-status-completed);
+  }
+  .border-status-completed {
+    border-color: var(--color-status-completed);
+  }
+  .bg-status-todo\/10 {
+    background-color: hsla(from var(--color-status-todo) var(--hue) var(--saturation) 10%);
+  }
+  .bg-status-inprogress\/10 {
+    background-color: hsla(from var(--color-status-inprogress) var(--hue) var(--saturation) 10%);
+  }
+  .bg-status-completed\/10 {
+    background-color: hsla(from var(--color-status-completed) var(--hue) var(--saturation) 10%);
+  }
+  .border-status-todo\/20 {
+    border-color: hsla(from var(--color-status-todo) var(--hue) var(--saturation) 20%);
+  }
+  .border-status-inprogress\/20 {
+    border-color: hsla(from var(--color-status-inprogress) var(--hue) var(--saturation) 20%);
+  }
+  .border-status-completed\/20 {
+    border-color: hsla(from var(--color-status-completed) var(--hue) var(--saturation) 20%);
+  }
+  .bg-status-todo\/15 {
+    background-color: hsla(from var(--color-status-todo) var(--hue) var(--saturation) 15%);
+  }
+  .bg-status-inprogress\/15 {
+    background-color: hsla(from var(--color-status-inprogress) var(--hue) var(--saturation) 15%);
+  }
+  .bg-status-completed\/15 {
+    background-color: hsla(from var(--color-status-completed) var(--hue) var(--saturation) 15%);
+  }
+  .bg-status-todo\/50 {
+    background-color: hsla(from var(--color-status-todo) var(--hue) var(--saturation) 50%);
+  }
+  .bg-status-inprogress\/50 {
+    background-color: hsla(from var(--color-status-inprogress) var(--hue) var(--saturation) 50%);
+  }
+  .bg-status-completed\/50 {
+    background-color: hsla(from var(--color-status-completed) var(--hue) var(--saturation) 50%);
   }
 }

@@ -30,11 +30,9 @@ import { getCookieByName } from "@/actions/auth/cookie";
 export function UpdateTaskDialog({
   taskId,
   currentStatus,
-  triggerLabel = "Change Status",
 }: {
   taskId: string;
   currentStatus: string;
-  triggerLabel?: string;
 }) {
   const [open, setOpen] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState(currentStatus);
@@ -81,15 +79,15 @@ export function UpdateTaskDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="w-full bg-primary-foreground text-primary px-4 py-4 rounded-xl text-sm font-semibold hover:bg-primary-foreground/80 transition-all active:scale-95 flex items-center justify-center gap-1 shadow-lg shadow-[#adc6ff]/10 whitespace-nowrap">
+        <Button className="w-fit bg-card text-card-foreground px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-card/80 transition-all active:scale-95 flex items-center justify-center gap-2 border border-border/50 shadow-md">
           Update Status
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-sm">
+      <DialogContent className="sm:max-w-sm border-border/50 shadow-xl">
         <DialogHeader>
-          <DialogTitle>Update Task Status</DialogTitle>
-          <DialogDescription>
-            Choose a new status for this task and click update.
+          <DialogTitle className="text-xl">Update Task Status</DialogTitle>
+          <DialogDescription className="text-muted-foreground">
+            Choose a new status for this task
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
@@ -97,20 +95,35 @@ export function UpdateTaskDialog({
             onValueChange={(value) => setSelectedStatus(value)}
             defaultValue={currentStatus}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full border-border/50">
               <SelectValue placeholder="Select status" />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                {statusOptions.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
+                {statusOptions.map((opt) => {
+                  const isSelected = opt.value === selectedStatus;
+                  const statusColor =
+                    opt.value === "Todo"
+                      ? "text-status-todo"
+                      : opt.value === "In_Progress"
+                        ? "text-status-inprogress"
+                        : "text-status-completed";
+                  return (
+                    <SelectItem
+                      key={opt.value}
+                      value={opt.value}
+                      className="py-2"
+                    >
+                      <span className={`font-medium ${statusColor}`}>
+                        {opt.label}
+                      </span>
+                    </SelectItem>
+                  );
+                })}
               </SelectGroup>
             </SelectContent>
           </Select>
-          <DialogFooter>
+          <DialogFooter className="flex gap-2">
             <DialogClose asChild>
               <Button
                 type="button"
@@ -120,7 +133,11 @@ export function UpdateTaskDialog({
                 Cancel
               </Button>
             </DialogClose>
-            <Button type="submit" disabled={mutation.isPending}>
+            <Button
+              type="submit"
+              disabled={mutation.isPending}
+              className="bg-project-blue text-primary-foreground hover:bg-project-blue/90"
+            >
               {mutation.isPending ? "Updating…" : "Update"}
             </Button>
           </DialogFooter>

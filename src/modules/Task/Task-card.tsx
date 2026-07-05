@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 
 import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 import { UpdateTaskDialog } from "./Update-Task-Dialog";
 import { User } from "lucide-react";
@@ -23,14 +24,27 @@ interface TaskCardProps {
   onUpdateStatus?: () => void;
 }
 
+// Priority color mapping
+const priorityColors = {
+  Critical: "text-destructive",
+  High: "text-orange-500",
+  Medium: "text-amber-500",
+  Low: "text-emerald-500",
+} as const;
+
+const priorityBgColors = {
+  Critical: "bg-destructive/10",
+  High: "bg-orange-500/10",
+  Medium: "bg-amber-500/10",
+  Low: "bg-emerald-500/10",
+} as const;
+
 export default function TaskCard({
   taskId,
   title = "Implement OAuth Authentication",
   description = "Integrate robust security protocols using OAuth 2.0. Ensure multi-provider support including GitHub and Google, with full refresh token rotation logic for enhanced session security.",
-  difficulty = "High",
   priority = "Critical",
   deadline = "Oct 24, 2023",
-  lastUpdated = "2 hours ago",
   assignee = {
     name: "Sarah Jenkins",
     role: "Lead Engineer",
@@ -38,99 +52,104 @@ export default function TaskCard({
       "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150",
     isOnline: true,
   },
-  onUpdateStatus,
   taskStatus,
 }: TaskCardProps) {
-  return (
-    <div className="hover:scale-[1.02] transition-transform duration-300 flex flex-col h-full">
-      {/* Main Glass-morphism Card Frame */}
-      <Card
-        className="bg-card flex flex-col h-full rounded-2xl p-4 py-4 shadow-2xl transition-all duration-300 transform group-hover:-translate-y-1 group-hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-[#424754]/30"
-        style={{
-          backdropFilter: "blur(12px)",
-        }}
-      >
-        {/* Header Badge & Title Section */}
-        <div className="flex justify-between items-start  h-[50px] ">
-          <div className="flex flex-row-reverse  flex-1">
-            <div className="flex flex-1 items-center gap-2">
-              {/* status */}
-              <span className="ml-auto w-fit inline-flex items-center px-3 py-1 rounded-full bg-muted-foreground/50 dark:bg-muted-foreground  text-primary text-xs font-medium border border-[#ffb4ab]/30 tracking-wide">
-                <svg
-                  className="w-3.5 h-3.5 mr-1.5 fill-current"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
-                </svg>
-                {taskStatus.split("_").join(" ")}
-              </span>
-            </div>
+  // Status color mapping
+  const getStatusColors = (status: string) => {
+    if (status === "Completed") return {
+      badge: "bg-status-completed/15 text-status-completed border-status-completed/30",
+      accent: "bg-status-completed",
+    };
+    if (status === "In_Progress") return {
+      badge: "bg-status-inprogress/15 text-status-inprogress border-status-inprogress/30",
+      accent: "bg-status-inprogress",
+    };
+    return {
+      badge: "bg-status-todo/15 text-status-todo border-status-todo/30",
+      accent: "bg-status-todo",
+    };
+  };
 
-            <h1 className="flex-1 mr-auto text-md md:text-lg font-bold text-card-foreground tracking-tight leading-tight">
-              {title}
-            </h1>
-          </div>
+  const statusColors = getStatusColors(taskStatus);
+
+  return (
+    <div className="hover:scale-[1.01] transition-all duration-200 flex flex-col h-full">
+      {/* Main Card Frame */}
+      <Card className={cn(
+        "bg-card flex flex-col h-full p-4 shadow-lg",
+        "transition-all duration-300 border",
+        "hover:shadow-xl hover:shadow-black/5",
+        "border-border/50",
+      )}>
+        {/* Accent Bar - positioned inside card with overflow-hidden clipping */}
+        <div className={cn(
+          "absolute top-0 left-0 bottom-0 w-0.5",
+          statusColors.accent,
+          "rounded-l-xl",
+          "z-0",
+        )}></div>
+
+        {/* Header Section with Status Badge */}
+        <div className="flex items-start gap-3 mb-2 relative">
+          <span className={cn(
+            "w-fit inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border",
+            statusColors.badge
+          )}>
+            {taskStatus.split("_").join(" ")}
+          </span>
+          <h2 className="text-sm font-bold text-card-foreground leading-tight line-clamp-2">
+            {title}
+          </h2>
         </div>
 
         {/* Task Summary Description */}
-        <p className="text-sm md:text-base font-normal text-muted-foreground  w-full overflow-hidden h-full lg:h-[70px] -mt-3">
+        <p className="text-sm text-muted-foreground line-clamp-2 mb-4 flex-1">
           {description}
         </p>
 
-        {/* Priority & Deadline Grid Matrix */}
-        <div className="flex gap-8  pb-2 border-b border-[#424754]/20 -mt-4">
-          <div className="flex flex-col ">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
-              Priority
-            </span>
-            <span className="text-sm md:text-base text-orange-500/70 flex items-center gap-2 font-medium">
-              <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+        {/* Meta Information Row */}
+        <div className="flex items-center justify-between gap-3 mb-3">
+          {/* Priority Indicator */}
+          <div className="flex items-center gap-2">
+            <div className={cn(
+              "w-2 h-2 rounded-full",
+              priorityBgColors[priority].replace("bg-", "bg-")
+            )}></div>
+            <span className={cn(
+              "text-xs font-medium px-2 py-0.5 rounded-full",
+              "bg-muted/50 text-muted-foreground",
+              priorityColors[priority]
+            )}>
               {priority}
             </span>
           </div>
-          <div className="flex flex-col  ml-auto sm:ml-0">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
-              Deadline
-            </span>
-            <span className="text-sm md:text-base text-card-foreground font-medium">
-              {format(deadline, "PP")}
-            </span>
+
+          {/* Deadline */}
+          <div className="text-xs text-muted-foreground">
+            Due: {format(deadline, "MMM d")}
           </div>
         </div>
 
-        {/* Assignee Meta Footprint & Call To Action */}
-        <div className="flex items-center justify-between gap-8 -mt-1">
-          <div className="flex items-center gap-3 flex-1">
-            <div className="relative flex-shrink-0">
-              {/* <img
-                alt={assignee.name}
-                className="w-10 h-10 rounded-full border-2 border-[#adc6ff]/20 object-cover"
-                src={assignee.avatarUrl}
-              /> */}
-              <User className="w-[28px] h-[28px]" />
+        {/* Assignee & Action Row */}
+        <div className="flex items-center justify-between pt-3 border-t border-border/30 mt-auto">
+          <div className="flex items-center gap-2">
+            <div className="relative shrink-0">
+              <User className="w-7 h-7 text-muted-foreground" />
               {assignee.isOnline && (
-                <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-[#1d2027] rounded-full" />
+                <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-status-completed border-2 border-card rounded-full" />
               )}
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="text-sm font-semibold text-card-foreground truncate">
+              <span className="text-sm font-medium text-card-foreground truncate">
                 {assignee.name}
               </span>
-              <span className="text-xs text-muted-foreground truncate">
-                Team Member
+              <span className="text-xs text-muted-foreground hidden sm:inline">
+                {assignee.role || "Team Member"}
               </span>
             </div>
           </div>
 
-          <div className="flex flex-col  items-center  gap-2 flex-1">
-            <UpdateTaskDialog taskId={taskId} currentStatus={taskStatus} />
-            {/* <button
-              onClick={onUpdateStatus}
-              className="w-full bg-primary text-primary-foreground px-4 py-1 rounded-xl text-sm font-semibold hover:bg-primary/80 transition-all active:scale-95 flex items-center justify-center gap-1 shadow-lg shadow-[#adc6ff]/10 whitespace-nowrap"
-            >
-              Assign Member
-            </button> */}
-          </div>
+          <UpdateTaskDialog taskId={taskId} currentStatus={taskStatus} />
         </div>
       </Card>
     </div>

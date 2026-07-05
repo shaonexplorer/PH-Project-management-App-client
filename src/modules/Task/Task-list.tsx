@@ -30,25 +30,34 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-// Status definitions
+// Status definitions with custom colors
 const statusConfig = {
   Todo: {
     key: "Todo",
     label: "To Do",
-    description: "Tasks that need to be done",
+    description: "Tasks waiting to be started",
     icon: "📋",
+    color: "text-status-todo",
+    bg: "bg-status-todo/10",
+    border: "border-status-todo/20",
   },
   In_Progress: {
     key: "In_Progress",
     label: "In Progress",
     description: "Tasks currently being worked on",
     icon: "🚧",
+    color: "text-status-inprogress",
+    bg: "bg-status-inprogress/10",
+    border: "border-status-inprogress/20",
   },
   Completed: {
     key: "Completed",
     label: "Completed",
     description: "Finished tasks",
     icon: "✅",
+    color: "text-status-completed",
+    bg: "bg-status-completed/10",
+    border: "border-status-completed/20",
   },
 } as const;
 
@@ -138,18 +147,18 @@ function SortableColumn({
   return (
     <div
       ref={setNodeRef}
-      className={`flex-1 flex flex-col bg-background/50 rounded-xl border transition-all duration-300 ${
+      className={`flex-1 flex flex-col rounded-2xl border transition-all duration-300 ${
         isOver
-          ? "border-primary bg-background/80 shadow-lg ring-2 ring-primary/20"
-          : "border-border hover:border-primary/50"
+          ? `${config.border} bg-card shadow-2xl ring-2 ${config.bg.replace("/10", "/20")} backdrop-blur-sm`
+          : "bg-card/50 border-border hover:bg-card/80"
       }`}
     >
       {/* Column Header */}
-      <div className="p-4 border-b border-border">
-        <h2 className="text-lg font-semibold text-card-foreground flex items-center gap-2">
+      <div className="p-4 border-b border-border/50">
+        <h2 className={`text-lg font-semibold flex items-center gap-2 ${config.color}`}>
           <span className="text-2xl">{config.icon}</span>
           <span>{config.label}</span>
-          <span className="ml-auto bg-muted text-muted-foreground text-xs font-medium px-2 py-1 rounded-full">
+          <span className={`ml-auto text-xs font-medium px-2.5 py-1 rounded-full ${config.bg} ${config.color}`}>
             {tasks.length}
           </span>
         </h2>
@@ -165,9 +174,9 @@ function SortableColumn({
       >
         <div className="flex-1 p-4 space-y-3">
           {tasks.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <div className="text-3xl mb-2 opacity-50">📭</div>
-              <p className="text-sm opacity-50">Drop task here</p>
+            <div className="text-center py-12 text-muted-foreground">
+              <div className="text-4xl mb-3 opacity-40">📭</div>
+              <p className="text-sm">Drop task here</p>
             </div>
           ) : (
             tasks.map((task) => <SortableTaskCard key={task.id} task={task} />)
@@ -310,27 +319,42 @@ function TaskList() {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="w-full p-4 bg-muted rounded-lg">
+      <div className="w-full p-4 sm:p-6 bg-card/30 backdrop-blur-sm rounded-2xl border border-border/50">
         {/* Header Controls */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">
-            <span className="text-2xl font-bold text-foreground">
+            <h1 className="text-2xl font-bold text-foreground">
               {statusConfig.Todo.icon} Kanban Board
-            </span>
+            </h1>
           </div>
           <div className="flex items-center gap-3">
             <SheetCreateTask />
-            <input
-              type="text"
-              placeholder="Search tasks…"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="px-3 py-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary flex-1 max-w-sm"
-            />
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search tasks…"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full max-w-xs px-4 py-2 text-sm border border-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-project-blue/50 bg-card/50 backdrop-blur-sm transition-all duration-200"
+              />
+              <svg
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-4.354-4.354A7 7 0 1116.954 16.954z"
+                />
+              </svg>
+            </div>
           </div>
         </div>
 
-        <Separator className="mb-4" />
+        <Separator className="mb-6 opacity-50" />
 
         {/* Kanban Columns */}
         <div className="flex flex-col lg:flex-row gap-6">
@@ -352,7 +376,7 @@ function TaskList() {
         {/* Drag Overlay */}
         <DragOverlay>
           {draggedTask ? (
-            <div className="bg-background border border-border rounded-lg p-4 shadow-lg w-75">
+            <div className="shadow-2xl">
               <TaskCard
                 taskId={draggedTask.id}
                 taskStatus={draggedTask.status}
@@ -374,34 +398,28 @@ function TaskList() {
         </DragOverlay>
 
         {/* Footer Stats */}
-        <div className="mt-6 pt-4 border-t border-border flex justify-between items-center text-sm text-muted-foreground">
+        <div className="mt-6 pt-4 border-t border-border/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm text-muted-foreground">
           <div className="flex items-center gap-4">
             <span>
-              Total tasks: <strong className="text-foreground">
+              Total tasks: <strong className="text-foreground font-medium">
                 {apiTasks.length}
               </strong>
             </span>
             {searchTerm && (
               <span>
-                Filtered: <strong className="text-foreground">
+                Filtered: <strong className="text-foreground font-medium">
                   {filteredTasks.length}
                 </strong>
               </span>
             )}
           </div>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-              <span className="text-xs">To Do</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
-              <span className="text-xs">In Progress</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-green-500"></div>
-              <span className="text-xs">Completed</span>
-            </div>
+          <div className="flex items-center gap-4">
+            {Object.entries(statusConfig).map(([key, config]) => (
+              <div key={key} className="flex items-center gap-1.5">
+                <div className={`w-2 h-2 rounded-full ${config.color.replace("text-", "bg-")}`}></div>
+                <span className="text-xs">{config.label}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
