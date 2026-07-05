@@ -25,6 +25,7 @@ These commands are defined in `package.json` under the `scripts` section.
   - `Theme/provider.tsx` – wraps the app with `next-themes` to enable dark/light mode.
   - `auth/` – contains `Login-form.tsx` and `Signup-Form.tsx` components used by the authentication routes.
   - `Task/` – contains task-related components including the Kanban board implementation.
+  - `Project/` – contains project-related components for the Projects page.
 - **Utilities**: Helper functions are in `src/lib/` (e.g., `utils.ts` for class name merging). The `cn` utility is imported in the root layout.
 - **Styling**: Tailwind CSS (v4) with `globals.css` for base styles. The project uses `tailwind-merge` to combine class strings safely.
 - **Icons**: Icons are provided by `@phosphor-icons/react` and `lucide-react`.
@@ -46,11 +47,16 @@ src/
 │   ├─ app-sidebar.tsx
 │   └─ nav-*.tsx        # Navigation components
 ├─ modules/             # Feature‑level modules (auth, theme, task, …)
-│   └─ Task/            # Task management module
-│       ├─ Task-list.tsx      # Kanban board implementation
-│       ├─ Task-card.tsx      # Individual task card component
-│       ├─ Update-Task-Dialog.tsx  # Dialog for updating task status
-│       └─ create-task-sheet.tsx   # Sheet for creating new tasks
+│   ├─ Task/            # Task management module
+│   │   ├─ Task-list.tsx          # Kanban board implementation
+│   │   ├─ Task-card.tsx          # Individual task card component
+│   │   ├─ task-card-skeleton.tsx # Loading skeleton for task cards
+│   │   ├─ Update-Task-Dialog.tsx # Dialog for updating task status
+│   │   └─ create-task-sheet.tsx  # Sheet for creating new tasks
+│   └─ Project/         # Project management module
+│       ├─ project-list.tsx       # Projects grid view
+│       ├─ project-card.tsx       # Individual project card component
+│       └─ project-card-skeleton.tsx # Loading skeleton for project cards
 ├─ lib/                 # Utility functions
 └─ styles/ (globals.css)
 ```
@@ -93,6 +99,16 @@ npm install @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities @dnd-kit/dom
 - Keyboard navigation supported via `KeyboardSensor`
 - Screen reader announcements via dnd-kit's built-in accessibility features
 
+## Loading Skeletons
+
+The project uses skeleton loaders for smooth loading states:
+
+- **Skeleton component**: Located at `src/components/ui/skeleton.tsx` - a reusable loading indicator with `animate-pulse` class
+- **ProjectCardSkeleton**: Located at `src/modules/Project/project-card-skeleton.tsx` - displays while projects are loading in the Projects page
+- **TaskCardSkeleton**: Located at `src/modules/Task/task-card-skeleton.tsx` - displays while tasks are loading in the Kanban board columns
+
+Both skeletons use the same styling as their respective card components (colors, borders, rounded corners) but with animated pulse effect for visual feedback during data fetching.
+
 ## Project‑Specific Hooks / Rules
 - There are no `.cursor` or Copilot rule files in this repository, so no special linting or AI‑assistant configurations need to be considered.
 - The `README.md` already contains the basic "Getting Started" instructions; the commands above are derived from it and `package.json`.
@@ -105,4 +121,4 @@ npm install @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities @dnd-kit/dom
 
 ---
 
-*Generated on 2026-06-07*
+*Generated on 2026-07-05*
