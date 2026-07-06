@@ -34,9 +34,9 @@ import { toast } from "sonner";
 import { createTaskAction } from "@/actions/Tasks/create";
 import { getMyProjects } from "@/actions/Project/get";
 
-// Zod schema for project creation
-const createProjectSchema = z.object({
-  title: z.string().min(1, "Project name is required"),
+// Zod schema for task creation
+const createTaskSchema = z.object({
+  title: z.string().min(1, "Task title is required"),
   description: z.string().optional(),
   priority: z.string().optional(),
   assignedMemberId: z.string().min(1, "Assign a member"),
@@ -46,20 +46,19 @@ const createProjectSchema = z.object({
     .refine((val) => !isNaN(Date.parse(val)), { message: "Invalid date" }),
 });
 
-type CreateProjectForm = z.infer<typeof createProjectSchema>;
+type CreateTaskForm = z.infer<typeof createTaskSchema>;
 
 export function SheetCreateTask() {
   const [open, setOpen] = useState(false);
-  const [project, setProject] = useState("");
+  const [projectId, setProjectId] = useState("");
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     setValue,
-    getValues,
-  } = useForm<CreateProjectForm>({
-    resolver: zodResolver(createProjectSchema),
+  } = useForm<CreateTaskForm>({
+    resolver: zodResolver(createTaskSchema),
     defaultValues: {
       title: "",
       description: "",
@@ -73,27 +72,24 @@ export function SheetCreateTask() {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: (data: CreateProjectForm) => createTaskAction(data),
+    mutationFn: (data: CreateTaskForm) => createTaskAction(data),
     onSuccess: (result) => {
-      console.log("Project created successfully:", result);
-      // Optionally close the sheet or reset form here
+      console.log("Task created successfully:", result);
       setOpen(false);
-      toast.success("Project created succesfully");
+      toast.success("Task created successfully");
 
       queryClient.invalidateQueries({ queryKey: ["my-tasks"] });
     },
     onError: (error) => {
-      console.error("Error creating project:", error);
-      toast.error(error.message || "Failed to create project");
+      console.error("Error creating task:", error);
+      toast.error(error.message || "Failed to create task");
     },
   });
 
   const teamMembers = useQuery({
-    queryKey: ["team-member-project", project],
-    queryFn: () => getTeamMembersByProject(project),
+    queryKey: ["team-member-project", projectId],
+    queryFn: () => getTeamMembersByProject(projectId),
   });
-
-  // console.log({ project });
 
   const allMembers = teamMembers?.data?.members.map(
     (m: { userId: string; name: string }) => ({
@@ -120,7 +116,7 @@ export function SheetCreateTask() {
     { value: "High", name: "High" },
   ];
 
-  const onSubmit = async (data: CreateProjectForm) => {
+  const onSubmit = async (data: CreateTaskForm) => {
     const result = await mutation.mutateAsync(data);
     console.log("Mutation result:", result);
   };
@@ -144,13 +140,13 @@ export function SheetCreateTask() {
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col gap-6 px-4 h-full"
         >
-          {/* Project Name */}
+          {/* Task Title */}
           <div className="grid gap-3">
-            <Label htmlFor="project-name">Name</Label>
+            <Label htmlFor="task-title">Task Title</Label>
             <Input
-              id="project-name"
+              id="task-title"
               {...register("title")}
-              placeholder="Enter project name"
+              placeholder="Enter task title"
             />
             {errors.title && (
               <p className="text-sm text-red-500">{errors.title.message}</p>
@@ -159,22 +155,22 @@ export function SheetCreateTask() {
 
           {/* Description */}
           <div className="grid gap-3">
-            <Label htmlFor="project-description">Description</Label>
+            <Label htmlFor="task-description">Description</Label>
             <textarea
-              id="project-description"
+              id="task-description"
               {...register("description")}
               placeholder="Optional description"
               className="min-h-[80px] w-full rounded-md border border-input   px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             />
           </div>
 
-          {/* Assign project */}
+          {/* Assign Project */}
           <div className="grid gap-3">
-            <Label htmlFor="project-member">Assign Project</Label>
+            <Label htmlFor="task-project">Project</Label>
             <Select
               onValueChange={(value) => {
                 setValue("projectId", value);
-                setProject(value);
+                setProjectId(value);
               }}
               defaultValue=""
             >
@@ -183,26 +179,26 @@ export function SheetCreateTask() {
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  {myProjects?.map((member: { id: string; value: string }) => (
-                    <SelectItem key={member.id} value={member.id}>
-                      {member.value}
+                  {myProjects?.map((project: { id: string; value: string }) => (
+                    <SelectItem key={project.id} value={project.id}>
+                      {project.value}
                     </SelectItem>
                   ))}
                 </SelectGroup>
               </SelectContent>
             </Select>
-            {errors.assignedMemberId && (
+            {errors.projectId && (
               <p className="text-sm text-red-500">
-                {errors.assignedMemberId.message}
+                {errors.projectId.message}
               </p>
             )}
           </div>
 
           {/* Assign Member */}
           <div className="grid gap-3">
-            <Label htmlFor="project-member">Assign Member</Label>
+            <Label htmlFor="task-member">Assign Member</Label>
             <Select
-              disabled={project.length == 0}
+              disabled={projectId.length === 0}
               onValueChange={(value) => setValue("assignedMemberId", value)}
               defaultValue=""
             >
@@ -226,14 +222,11 @@ export function SheetCreateTask() {
             )}
           </div>
 
-          {/* Add priority */}
+          {/* Priority */}
           <div className="grid gap-3">
-            <Label htmlFor="project-member">Priority</Label>
+            <Label htmlFor="task-priority">Priority</Label>
             <Select
-              onValueChange={(value) => {
-                setValue("priority", value);
-                setProject(value);
-              }}
+              onValueChange={(value) => setValue("priority", value)}
               defaultValue=""
             >
               <SelectTrigger className="w-full">
@@ -242,27 +235,27 @@ export function SheetCreateTask() {
               <SelectContent>
                 <SelectGroup>
                   {priorityLevels?.map(
-                    (member: { name: string; value: string }) => (
-                      <SelectItem key={member.value} value={member.value}>
-                        {member.name}
+                    (level: { name: string; value: string }) => (
+                      <SelectItem key={level.value} value={level.value}>
+                        {level.name}
                       </SelectItem>
                     ),
                   )}
                 </SelectGroup>
               </SelectContent>
             </Select>
-            {errors.assignedMemberId && (
+            {errors.priority && (
               <p className="text-sm text-red-500">
-                {errors.assignedMemberId.message}
+                {errors.priority.message}
               </p>
             )}
           </div>
 
           {/* Due Date */}
           <div className="grid gap-3">
-            <Label htmlFor="project-due-date">Due Date</Label>
+            <Label htmlFor="task-due-date">Due Date</Label>
             <Input
-              id="project-due-date"
+              id="task-due-date"
               type="date"
               {...register("deadline")}
             />
