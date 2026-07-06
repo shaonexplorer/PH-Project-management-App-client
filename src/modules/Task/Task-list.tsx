@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import TaskCard from "./Task-card";
 import { TaskCardSkeleton } from "./task-card-skeleton";
+import { EmptyTasks } from "./empty-tasks";
 import { Separator } from "@/components/ui/separator";
 import { SheetCreateTask } from "./create-task-sheet";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -370,23 +371,44 @@ function TaskList() {
 
         <Separator className="mb-6 opacity-50" />
 
-        {/* Kanban Columns */}
-        <div className="flex flex-col lg:flex-row gap-6">
-          {Object.entries(statusConfig).map(([statusKey, config]) => {
-            const status = statusKey as StatusKey;
-            const tasksInColumn = tasksByStatus[status] || [];
+        {/* Global Loading State */}
+        {tasks.isLoading ? (
+          <div className="flex flex-col lg:flex-row gap-6">
+            {Object.entries(statusConfig).map(([statusKey, config]) => {
+              const status = statusKey as StatusKey;
+              return (
+                <SortableColumn
+                  key={status}
+                  status={status}
+                  config={config}
+                  tasks={[]}
+                  isLoading={true}
+                />
+              );
+            })}
+          </div>
+        ) : apiTasks.length === 0 ? (
+          // Show empty state when no tasks exist
+          <EmptyTasks />
+        ) : (
+          // Kanban Columns
+          <div className="flex flex-col lg:flex-row gap-6">
+            {Object.entries(statusConfig).map(([statusKey, config]) => {
+              const status = statusKey as StatusKey;
+              const tasksInColumn = tasksByStatus[status] || [];
 
-            return (
-              <SortableColumn
-                key={status}
-                status={status}
-                config={config}
-                tasks={tasksInColumn}
-                isLoading={tasks.isLoading}
-              />
-            );
-          })}
-        </div>
+              return (
+                <SortableColumn
+                  key={status}
+                  status={status}
+                  config={config}
+                  tasks={tasksInColumn}
+                  isLoading={tasks.isLoading}
+                />
+              );
+            })}
+          </div>
+        )}
 
         {/* Drag Overlay */}
         <DragOverlay dropAnimation={null}>

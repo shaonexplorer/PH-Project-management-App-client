@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Plus } from "lucide-react";
 import ProjectInfoCard from "./project-card";
 import { ProjectCardSkeleton } from "./project-card-skeleton";
+import { EmptyProjects } from "./empty-projects";
 import {
   Select,
   SelectContent,
@@ -115,6 +116,9 @@ function ProjectList() {
           Array.from({ length: 6 }).map((_, index) => (
             <ProjectCardSkeleton key={index} />
           ))
+        ) : projects?.data?.projects?.length === 0 ? (
+          // Show empty state when no projects exist
+          <EmptyProjects />
         ) : (
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           projects?.data?.projects.map((project: any) => {
