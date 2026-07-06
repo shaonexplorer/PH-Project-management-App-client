@@ -99,7 +99,7 @@ export default function TaskCard({
         ></div>
 
         {/* Header Section with Status Badge */}
-        <div className="flex items-start gap-3 mb-2 relative">
+        <div className="flex items-start gap-3  relative">
           <span
             className={cn(
               "w-fit inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border",
@@ -108,18 +108,18 @@ export default function TaskCard({
           >
             {taskStatus.split("_").join(" ")}
           </span>
-          <h2 className="text-sm font-bold text-card-foreground leading-tight line-clamp-2">
+          {/* <h2 className="text-sm font-bold text-card-foreground leading-tight line-clamp-2">
             {title}
-          </h2>
+          </h2> */}
         </div>
 
         {/* Task Summary Description */}
-        <p className="text-sm text-muted-foreground line-clamp-2 mb-4 flex-1">
+        <p className="text-sm text-muted-foreground line-clamp-2 flex-1">
           {description}
         </p>
 
         {/* Meta Information Row */}
-        <div className="flex items-center justify-between gap-3 mb-3">
+        <div className="flex items-center justify-between gap-3">
           {/* Priority Indicator */}
           <div className="flex items-center gap-2">
             <div
@@ -146,10 +146,10 @@ export default function TaskCard({
         </div>
 
         {/* Assignee & Action Row */}
-        <div className="flex items-center justify-between pt-3 border-t border-border/30 mt-auto">
+        <div className="flex items-center justify-between pt-2 border-t border-border/30 mt-auto">
           <div className="flex items-center gap-2">
             <div className="relative shrink-0">
-              <User className="w-7 h-7 text-muted-foreground" />
+              <User className="w-[18px] h-[18px] text-muted-foreground" />
               {assignee.isOnline && (
                 <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-status-completed border-2 border-card rounded-full" />
               )}
@@ -157,9 +157,6 @@ export default function TaskCard({
             <div className="flex flex-col min-w-0">
               <span className="text-sm font-medium text-card-foreground truncate">
                 {assignee.name}
-              </span>
-              <span className="text-xs text-muted-foreground hidden sm:inline">
-                {assignee.role || "Team Member"}
               </span>
             </div>
           </div>

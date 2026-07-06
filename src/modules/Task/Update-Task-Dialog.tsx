@@ -79,7 +79,7 @@ export function UpdateTaskDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="w-fit bg-card text-card-foreground px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-card/80 transition-all active:scale-95 flex items-center justify-center gap-2 border border-border/50 shadow-md">
+        <Button className="w-fit bg-primary text-primary-foreground px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-primary/80 transition-all active:scale-95 flex items-center justify-center gap-2 border border-border/50 shadow-md">
           Update Status
         </Button>
       </DialogTrigger>
@@ -136,7 +136,7 @@ export function UpdateTaskDialog({
             <Button
               type="submit"
               disabled={mutation.isPending}
-              className="bg-project-blue text-primary-foreground hover:bg-project-blue/90"
+              className="bg-primary text-primary-foreground hover:bg-primary/80"
             >
               {mutation.isPending ? "Updating…" : "Update"}
             </Button>
