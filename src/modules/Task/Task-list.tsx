@@ -32,6 +32,8 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { getMyProjects } from "@/actions/Project/get";
+import { CreateProjectRequiredDialog } from "./Create-Project-Required-dialog";
 
 // Status definitions with custom colors
 const statusConfig = {
@@ -327,6 +329,11 @@ function TaskList() {
     }
   };
 
+  const projects = useQuery({
+    queryKey: ["my-projects"],
+    queryFn: getMyProjects,
+  });
+
   return (
     <DndContext
       sensors={sensors}
@@ -343,7 +350,11 @@ function TaskList() {
             </h1>
           </div>
           <div className="flex items-center gap-3">
-            <SheetCreateTask />
+            {!projects?.isLoading && projects?.data?.projects?.length > 0 ? (
+              <SheetCreateTask />
+            ) : !projects?.isLoading ? (
+              <CreateProjectRequiredDialog />
+            ) : null}
             <div className="relative">
               <input
                 type="text"

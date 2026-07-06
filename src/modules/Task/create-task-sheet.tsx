@@ -29,11 +29,10 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { getTeamMembersByProject } from "@/actions/team-member";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { createTaskAction } from "@/actions/Tasks/create";
 import { getMyProjects } from "@/actions/Project/get";
-import { CreateProjectRequiredDialog } from "./Create-Project-Required-dialog";
 
 // Zod schema for task creation
 const createTaskSchema = z.object({
@@ -52,7 +51,6 @@ type CreateTaskForm = z.infer<typeof createTaskSchema>;
 export function SheetCreateTask() {
   const [open, setOpen] = useState(false);
   const [projectId, setProjectId] = useState("");
-  const [showNoProjectsDialog, setShowNoProjectsDialog] = useState(true);
 
   const {
     register,
@@ -122,13 +120,6 @@ export function SheetCreateTask() {
     const result = await mutation.mutateAsync(data);
     console.log("Mutation result:", result);
   };
-
-  useEffect(() => {
-    if (projects?.data?.projects && projects.data.projects.length === 0) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setShowNoProjectsDialog(true);
-    }
-  }, [projects?.data?.projects?.length]);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -280,12 +271,6 @@ export function SheetCreateTask() {
             </SheetClose>
           </SheetFooter>
         </form>
-
-        {/* Dialog to inform user to create a project first */}
-        <CreateProjectRequiredDialog
-          open={showNoProjectsDialog}
-          onOpenChange={setShowNoProjectsDialog}
-        />
       </SheetContent>
     </Sheet>
   );

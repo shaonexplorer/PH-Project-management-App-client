@@ -76,7 +76,7 @@ function ProjectList() {
     queryFn: getMyProjects,
   });
 
-  console.log({ projects: projects?.data?.projects });
+  // console.log({ projects: projects?.data?.projects });
 
   return (
     <div className="w-full p-4 bg-muted rounded-lg">
