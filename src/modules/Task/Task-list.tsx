@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 import TaskCard from "./Task-card";
 import { TaskCardSkeleton } from "./task-card-skeleton";
@@ -155,11 +155,11 @@ function SortableColumn({
       className={`flex-1 flex flex-col rounded-2xl border transition-all duration-300 ${
         isOver
           ? `${config.border} bg-card shadow-2xl ring-2 ${config.bg.replace("/10", "/20")} backdrop-blur-sm`
-          : "bg-card/50 border-border hover:bg-card/80"
+          : "bg-card border-border/50 hover:bg-card/80"
       }`}
     >
       {/* Column Header */}
-      <div className="p-4 border-b border-border/50">
+      <div className="p-4 border-b border-border/50 bg-muted/30">
         <h2
           className={`text-lg font-semibold flex items-center gap-2 ${config.color}`}
         >
@@ -340,8 +340,9 @@ function TaskList() {
         {/* Header Controls */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-foreground">
-              {statusConfig.Todo.icon} Kanban Board
+            <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+              <span className="text-3xl">{statusConfig.Todo.icon}</span>
+              <span>Kanban Board</span>
             </h1>
           </div>
           <div className="flex items-center gap-3">
@@ -356,7 +357,7 @@ function TaskList() {
                 placeholder="Search tasks…"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full max-w-xs px-4 py-2 text-sm border border-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-project-blue/50 bg-card/50 backdrop-blur-sm transition-all duration-200"
+                className="w-full max-w-xs px-4 py-2 text-sm border border-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-project-blue/50 bg-card/50 backdrop-blur-sm transition-all duration-200 placeholder:text-muted-foreground"
               />
               <svg
                 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
@@ -419,22 +420,24 @@ function TaskList() {
         {/* Drag Overlay */}
         <DragOverlay dropAnimation={null}>
           {draggedTask ? (
-            <TaskCard
-              taskId={draggedTask.id}
-              taskStatus={draggedTask.status}
-              deadline={draggedTask.dueDate}
-              title={draggedTask.title}
-              description={draggedTask.description}
-              priority={draggedTask.priority}
-              assignee={{
-                name: draggedTask.assignee?.name || "Unassigned",
-                role: draggedTask.assignee?.role || "Team Member",
-                avatarUrl:
-                  draggedTask.assignee?.avatarUrl ||
-                  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150",
-                isOnline: draggedTask.assignee?.isOnline ?? false,
-              }}
-            />
+            <div className="mb-3">
+              <TaskCard
+                taskId={draggedTask.id}
+                taskStatus={draggedTask.status}
+                deadline={draggedTask.dueDate}
+                title={draggedTask.title}
+                description={draggedTask.description}
+                priority={draggedTask.priority}
+                assignee={{
+                  name: draggedTask.assignee?.name || "Unassigned",
+                  role: draggedTask.assignee?.role || "Team Member",
+                  avatarUrl:
+                    draggedTask.assignee?.avatarUrl ||
+                    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150",
+                  isOnline: draggedTask.assignee?.isOnline ?? false,
+                }}
+              />
+            </div>
           ) : null}
         </DragOverlay>
 

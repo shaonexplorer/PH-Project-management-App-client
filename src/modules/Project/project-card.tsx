@@ -1,5 +1,8 @@
+"use client";
+
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
+import { cn } from "@/lib/utils";
 import { DialogAddMember } from "./Add-member-dialog";
 import { DeleteProjectConfirmDialog } from "./Delete-Confirm-dialog";
 import { UpdateProjectDialog } from "./Update-Project-Dialog";
@@ -18,6 +21,32 @@ interface ProjectCardProps {
   onViewDetails?: () => void;
 }
 
+// Status color mappings
+const getStatusColors = (daysLeft: number, completionPercentage: number) => {
+  if (completionPercentage >= 100) {
+    return {
+      accent: "bg-status-completed",
+      badge: "bg-status-completed/15 text-status-completed",
+    };
+  }
+  if (daysLeft <= 0) {
+    return {
+      accent: "bg-destructive",
+      badge: "bg-destructive/15 text-destructive",
+    };
+  }
+  if (daysLeft <= 7) {
+    return {
+      accent: "bg-amber-500",
+      badge: "bg-amber-500/15 text-amber-500",
+    };
+  }
+  return {
+    accent: "bg-primary",
+    badge: "bg-primary/15 text-primary",
+  };
+};
+
 export default function ProjectInfoCard({
   projectId,
   title = "Global Brand Refresh",
@@ -33,28 +62,32 @@ export default function ProjectInfoCard({
   onViewDetails,
 }: ProjectCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
-  const innerCardRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
-  const highlightRef = useRef<HTMLDivElement>(null);
+  const accentRef = useRef<HTMLDivElement>(null);
+
+  const statusColors = getStatusColors(daysLeft, completionPercentage);
 
   useEffect(() => {
     // --- Entrance Animation Sequence ---
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
-      tl.to(cardRef.current, {
-        opacity: 1,
-        y: 0,
-        duration: 1,
-        delay: 0.2,
-      }).to(
+      tl.from(
+        cardRef.current,
+        {
+          opacity: 0,
+          y: 30,
+          duration: 0.8,
+        },
+        0,
+      ).from(
         progressBarRef.current,
         {
-          width: `${completionPercentage}%`,
-          duration: 1.5,
+          width: "0%",
+          duration: 1.2,
           ease: "power4.out",
         },
-        "-=0.5",
+        0.3,
       );
     });
 
@@ -62,81 +95,99 @@ export default function ProjectInfoCard({
   }, [completionPercentage]);
 
   return (
-    <div className="hover:scale-[1.02] transition-transform duration-300">
-      {/* Container Wrapper with initial opacity/transform for entrance */}
-      <main ref={cardRef} className=" w-full  h-full ">
+    <div className="hover:shadow-xl transition-shadow duration-300">
+      <div
+        ref={cardRef}
+        className="flex flex-col h-full bg-card rounded-2xl p-6 border border-border/50 overflow-hidden"
+      >
+        {/* Accent Bar - Left border that indicates status */}
         <div
-          ref={innerCardRef}
-          className="flex flex-col h-full relative bg-card rounded-2xl p-6 group transition-all duration-300 overflow-hidden style={{ border: '1px solid rgba(115, 118, 134, 0.1)' }}"
-          style={{ transformStyle: "preserve-3d", perspective: "1000px" }}
-        >
-          {/* Hover Sweep Gradient Layer */}
-          <div
-            ref={highlightRef}
-            className="absolute top-0 left-[-100%] w-1/2 h-full pointer-events-none bg-gradient-to-r from-transparent via-blue-600/[0.03] to-transparent"
-          />
+          ref={accentRef}
+          className={cn(
+            "absolute top-0 left-0 bottom-0 w-1.5",
+            statusColors.accent,
+          )}
+        />
 
-          {/* Title & Actions Row */}
-          <div className="flex justify-between items-center mb-2">
-            <h1 className="text-base font-semibold text-card-foreground/80 tracking-tight">
-              {title}
-            </h1>
-            <div className="flex gap-2">
-              <UpdateProjectDialog
-                projectId={projectId}
-                currentName={title}
-                currentDescription={description}
-                currentDeadline={deadline}
-              />
-              <DeleteProjectConfirmDialog
-                projectId={projectId}
-                projectTitle={title}
-              />
-            </div>
-          </div>
-
-          {/* Progress Velocity Gauge Section */}
-          <div className="space-y-2 mb-6">
-            <div className="flex justify-between items-end">
-              <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-                Current Velocity
-              </p>
-              <p className="text-base font-semibold text-orange-300">
-                {completionPercentage}% Complete
-              </p>
-            </div>
-            <div className="w-full h-2 bg-primary/20 rounded-full overflow-hidden">
-              <div
-                ref={progressBarRef}
-                className="h-full bg-primary w-0 rounded-full transition-all duration-1000 ease-out"
-              />
-            </div>
-          </div>
-
-          {/* Card Meta Footer Section */}
-          <div className="flex justify-between items-center pt-4 border-t border-[#c3c6d7]/30">
-            <div className="inline-flex items-center gap-1.5 px-4 py-1 bg-[#d3e4fe] text-[#0b1c30] rounded-full">
-              <svg
-                className="w-4 h-4 text-current"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <span className="text-sm font-semibold">
-                {daysLeft} Days Left
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <DialogAddMember projectId={projectId} />
-            </div>
+        {/* Title & Actions Row */}
+        <div className="flex justify-between items-start mb-4">
+          <h2 className="text-lg font-semibold text-card-foreground leading-tight">
+            {title || "Untitled Project"}
+          </h2>
+          <div className="flex gap-2">
+            <UpdateProjectDialog
+              projectId={projectId}
+              currentName={title || ""}
+              currentDescription={description}
+              currentDeadline={deadline}
+            />
+            <DeleteProjectConfirmDialog
+              projectId={projectId}
+              projectTitle={title || ""}
+            />
           </div>
         </div>
-      </main>
+
+        {/* Project Lead Info */}
+        <div className="flex items-center gap-3 mb-6">
+          <img
+            src={projectLead?.avatarUrl || "/avatars/default-avatar.png"}
+            alt={projectLead?.name || "Project Lead"}
+            className="w-10 h-10 rounded-full object-cover border-2 border-border/50"
+          />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-card-foreground">
+              {projectLead?.name || "Unassigned"}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Project Lead
+            </p>
+          </div>
+        </div>
+
+        {/* Progress Section */}
+        <div className="space-y-2 mb-6">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <span
+                className={cn(
+                  "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+                  statusColors.badge,
+                )}
+              >
+                {completionPercentage >= 100 ? "Completed" : "Active"}
+              </span>
+              <span className="text-sm text-muted-foreground">
+                {completionPercentage}% Complete
+              </span>
+            </div>
+          </div>
+          <div className="w-full h-2.5 bg-muted/50 rounded-full overflow-hidden">
+            <div
+              ref={progressBarRef}
+              className={cn(
+                "h-full rounded-full transition-all duration-1000 ease-out",
+                completionPercentage >= 100
+                  ? "bg-status-completed"
+                  : completionPercentage >= 50
+                    ? "bg-primary"
+                    : "bg-amber-500",
+              )}
+              style={{ width: `${Math.min(completionPercentage, 100)}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Footer Section */}
+        <div className="flex justify-between items-center pt-3 border-t border-border/30 mt-auto">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground font-medium">
+              {daysLeft > 0 ? `${daysLeft} days left` : "Deadline passed"}
+            </span>
+          </div>
+          <DialogAddMember projectId={projectId} />
+        </div>
+      </div>
     </div>
   );
 }

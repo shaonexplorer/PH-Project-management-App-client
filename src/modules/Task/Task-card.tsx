@@ -1,11 +1,8 @@
 import { Card } from "@/components/ui/card";
-
-import { format, parse, isValid } from "date-fns";
 import { cn } from "@/lib/utils";
-
+import { format, parse, isValid } from "date-fns";
 import { UpdateTaskDialog } from "./Update-Task-Dialog";
 import { DeleteTaskConfirmDialog } from "./Delete-Task-Confirm-dialog";
-import { User } from "lucide-react";
 
 interface TaskCardProps {
   taskId: string;
@@ -40,6 +37,27 @@ const priorityBgColors = {
   Low: "bg-emerald-500/10",
 } as const;
 
+// Status color mappings
+const getStatusColors = (status: string) => {
+  if (status === "Completed")
+    return {
+      badge: "bg-status-completed/15 text-status-completed border-status-completed/30",
+      accent: "bg-status-completed",
+      progress: "bg-status-completed",
+    };
+  if (status === "In_Progress")
+    return {
+      badge: "bg-status-inprogress/15 text-status-inprogress border-status-inprogress/30",
+      accent: "bg-status-inprogress",
+      progress: "bg-status-inprogress",
+    };
+  return {
+    badge: "bg-status-todo/15 text-status-todo border-status-todo/30",
+    accent: "bg-status-todo",
+    progress: "bg-status-todo",
+  };
+};
+
 export default function TaskCard({
   taskId,
   title = "Implement OAuth Authentication",
@@ -55,36 +73,25 @@ export default function TaskCard({
   },
   taskStatus,
 }: TaskCardProps) {
-  // Status color mapping
-  const getStatusColors = (status: string) => {
-    if (status === "Completed")
-      return {
-        badge:
-          "bg-status-completed/15 text-status-completed border-status-completed/30",
-        accent: "bg-status-completed",
-      };
-    if (status === "In_Progress")
-      return {
-        badge:
-          "bg-status-inprogress/15 text-status-inprogress border-status-inprogress/30",
-        accent: "bg-status-inprogress",
-      };
-    return {
-      badge: "bg-status-todo/15 text-status-todo border-status-todo/30",
-      accent: "bg-status-todo",
-    };
-  };
-
   const statusColors = getStatusColors(taskStatus);
 
+  // Calculate progress percentage based on status
+  const getProgressPercent = (status: string) => {
+    if (status === "Completed") return 100;
+    if (status === "In_Progress") return 65;
+    return 20;
+  };
+
+  const progressPercent = getProgressPercent(taskStatus);
+
   return (
-    <div className="hover:scale-[1.01] transition-all duration-200 flex flex-col h-full">
+    <div className="hover:shadow-xl transition-all duration-300 flex flex-col h-full">
       {/* Main Card Frame */}
       <Card
         className={cn(
-          "bg-card flex flex-col h-full p-4 shadow-lg",
+          "bg-card flex flex-col h-full p-5 shadow-lg",
           "transition-all duration-300 border",
-          "hover:shadow-xl hover:shadow-black/5",
+          "hover:shadow-2xl hover:shadow-black/5",
           "border-border/50",
           "overflow-hidden relative",
         )}
@@ -92,7 +99,7 @@ export default function TaskCard({
         {/* Accent Bar - positioned inside card with overflow-hidden clipping */}
         <div
           className={cn(
-            "absolute top-0 left-0 bottom-0 w-0.5",
+            "absolute top-0 left-0 bottom-0 w-1",
             statusColors.accent,
             "rounded-l-xl",
             "z-0",
@@ -100,7 +107,7 @@ export default function TaskCard({
         ></div>
 
         {/* Header Section with Status Badge */}
-        <div className="flex items-start gap-3  relative">
+        <div className="flex items-start gap-3 relative z-10">
           <span
             className={cn(
               "w-fit inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border",
@@ -109,58 +116,87 @@ export default function TaskCard({
           >
             {taskStatus.split("_").join(" ")}
           </span>
-          {/* <h2 className="text-sm font-bold text-card-foreground leading-tight line-clamp-2">
+          <h2 className="text-sm font-bold text-card-foreground leading-tight line-clamp-2 flex-1">
             {title}
-          </h2> */}
+          </h2>
         </div>
 
         {/* Task Summary Description */}
-        <p className="text-sm opacity-75 line-clamp-2 flex-1">{description}</p>
+        <p className="text-sm text-muted-foreground/80 line-clamp-2 flex-1 mt-2">
+          {description}
+        </p>
 
-        {/* Meta Information Row */}
-        <div className="flex items-center justify-between gap-3">
-          {/* Priority Indicator */}
-          <div className="flex items-center gap-2">
+        {/* Progress Section */}
+        <div className="mt-4 mb-3">
+          <div className="flex justify-between items-center mb-1.5">
+            <div className="flex items-center gap-2">
+              <div
+                className={cn(
+                  "w-2 h-2 rounded-full",
+                  priorityBgColors[priority].replace("bg-", "bg-"),
+                )}
+              ></div>
+              <span
+                className={cn(
+                  "text-xs font-medium px-2 py-0.5 rounded-full",
+                  "bg-muted/50 text-muted-foreground",
+                  priorityColors[priority],
+                )}
+              >
+                {priority}
+              </span>
+            </div>
+            <div className="text-xs text-muted-foreground">
+              Progress
+            </div>
+          </div>
+          <div className="w-full h-2 bg-muted/50 rounded-full overflow-hidden">
             <div
               className={cn(
-                "w-2 h-2 rounded-full",
-                priorityBgColors[priority].replace("bg-", "bg-"),
+                "h-full rounded-full transition-all duration-500",
+                statusColors.progress,
               )}
-            ></div>
-            <span
-              className={cn(
-                "text-xs font-medium px-2 py-0.5 rounded-full",
-                "bg-muted/50 text-muted-foreground",
-                priorityColors[priority],
-              )}
-            >
-              {priority}
-            </span>
-          </div>
-
-          {/* Deadline */}
-          <div className="text-xs text-muted-foreground">
-            {deadline && `Due: ${format(deadline, "MMM d")}`}
+              style={{ width: `${progressPercent}%` }}
+            />
           </div>
         </div>
 
+        {/* Meta Information Row */}
+        <div className="flex items-center justify-between gap-3 text-xs">
+          {/* Deadline */}
+          {deadline && (
+            <div className="text-muted-foreground">
+              Due: {format(deadline, "MMM d")}
+            </div>
+          )}
+        </div>
+
         {/* Assignee & Action Row */}
-        <div className="flex items-center justify-between pt-2 border-t border-border/30 mt-auto">
+        <div className="flex items-center justify-between pt-3 border-t border-border/30 mt-auto">
           <div className="flex items-center gap-2">
             <div className="relative shrink-0">
-              <User className="w-[18px] h-[18px] text-muted-foreground" />
-              {assignee.isOnline && (
-                <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-status-completed border-2 border-card rounded-full" />
+              <img
+                src={assignee?.avatarUrl || "/avatars/default-avatar.png"}
+                alt={assignee?.name || "Assignee"}
+                className="w-8 h-8 rounded-full object-cover border border-border/50"
+              />
+              {assignee?.isOnline && (
+                <div className="absolute bottom-0.5 right-0.5 w-2.5 h-2.5 bg-status-completed border-2 border-card rounded-full" />
               )}
             </div>
             <div className="flex flex-col min-w-0">
               <span className="text-sm font-medium text-card-foreground truncate">
-                {assignee.name}
+                {assignee?.name || "Unassigned"}
               </span>
+              {assignee?.role && (
+                <span className="text-xs text-muted-foreground">
+                  {assignee.role}
+                </span>
+              )}
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <UpdateTaskDialog
               taskId={taskId}
               currentStatus={taskStatus}
