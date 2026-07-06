@@ -122,27 +122,6 @@ export default function ProjectInfoCard({
             </div>
           </div>
 
-          {/* Member Meta Information */}
-          <div className="flex items-center gap-4">
-            <div className="relative w-12 h-12">
-              {/* <img
-                alt={projectLead.name}
-                className="w-full h-full object-cover rounded-full border-2 border-secondary"
-                src={projectLead.avatarUrl}
-              /> */}
-              <User className="w-[50px] h-[50px]" />
-              <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#006c49] rounded-full border-2 border-primary" />
-            </div>
-            <div>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                Project Lead
-              </p>
-              <p className="text-md font-semibold text-card-foreground">
-                {projectLead.name}
-              </p>
-            </div>
-          </div>
-
           {/* Progress Velocity Gauge Section */}
           <div className="space-y-2 mb-6">
             <div className="flex justify-between items-end">

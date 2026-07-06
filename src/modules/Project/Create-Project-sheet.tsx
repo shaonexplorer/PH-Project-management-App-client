@@ -36,7 +36,7 @@ import { toast } from "sonner";
 const createProjectSchema = z.object({
   name: z.string().min(1, "Project name is required"),
   description: z.string().optional(),
-  memberId: z.string().min(1, "Assign a member"),
+
   dueDate: z
     .string()
     .refine((val) => !isNaN(Date.parse(val)), { message: "Invalid date" }),
@@ -58,7 +58,7 @@ export function SheetCreateProject() {
     defaultValues: {
       name: "",
       description: "",
-      memberId: "",
+
       dueDate: "",
     },
   });
@@ -139,31 +139,6 @@ export function SheetCreateProject() {
               placeholder="Optional description"
               className="min-h-[80px] w-full rounded-md border border-input   px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             />
-          </div>
-
-          {/* Assign Member */}
-          <div className="grid gap-3">
-            <Label htmlFor="project-member">Project Lead</Label>
-            <Select
-              onValueChange={(value) => setValue("memberId", value)}
-              defaultValue=""
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select a member" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {allMembers?.map((member: { id: string; value: string }) => (
-                    <SelectItem key={member.id} value={member.id}>
-                      {member.value}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-            {errors.memberId && (
-              <p className="text-sm text-red-500">{errors.memberId.message}</p>
-            )}
           </div>
 
           {/* Due Date */}
