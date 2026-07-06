@@ -61,6 +61,28 @@ src/
 └─ styles/ (globals.css)
 ```
 
+## Authentication
+
+### Server Actions
+Server actions are located in `src/actions/auth/`:
+- `login.ts` - `loginAction` - Authenticates users and sets auth cookies
+- `register.ts` - `registerAction` - Registers new users with a specified role (e.g., "projectManager")
+
+### Login Form
+`src/modules/auth/Login-form.tsx` uses:
+- React Hook Form with Zod validation
+- TanStack Query `useMutation` for API calls
+- `loginAction` server action for authentication
+
+### Signup Form
+`src/modules/auth/Signup-Form.tsx` uses:
+- React Hook Form with Zod validation
+- TanStack Query `useMutation` for API calls
+- `registerAction` server action for registration
+- Automatically registers users as `projectManager` role
+- Password visibility toggle for both password fields
+- Form validation with error messages displayed inline
+
 ## Kanban Board Implementation (dnd-kit)
 
 The Kanban board in `src/modules/Task/Task-list.tsx` uses **dnd-kit** for drag-and-drop functionality. Key components:
