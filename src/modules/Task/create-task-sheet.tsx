@@ -29,10 +29,11 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { getTeamMembersByProject } from "@/actions/team-member";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { createTaskAction } from "@/actions/Tasks/create";
 import { getMyProjects } from "@/actions/Project/get";
+import { CreateProjectRequiredDialog } from "./Create-Project-Required-dialog";
 
 // Zod schema for task creation
 const createTaskSchema = z.object({
@@ -51,6 +52,7 @@ type CreateTaskForm = z.infer<typeof createTaskSchema>;
 export function SheetCreateTask() {
   const [open, setOpen] = useState(false);
   const [projectId, setProjectId] = useState("");
+  const [showNoProjectsDialog, setShowNoProjectsDialog] = useState(true);
 
   const {
     register,
@@ -121,6 +123,13 @@ export function SheetCreateTask() {
     console.log("Mutation result:", result);
   };
 
+  useEffect(() => {
+    if (projects?.data?.projects && projects.data.projects.length === 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setShowNoProjectsDialog(true);
+    }
+  }, [projects?.data?.projects?.length]);
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
@@ -188,9 +197,7 @@ export function SheetCreateTask() {
               </SelectContent>
             </Select>
             {errors.projectId && (
-              <p className="text-sm text-red-500">
-                {errors.projectId.message}
-              </p>
+              <p className="text-sm text-red-500">{errors.projectId.message}</p>
             )}
           </div>
 
@@ -245,20 +252,14 @@ export function SheetCreateTask() {
               </SelectContent>
             </Select>
             {errors.priority && (
-              <p className="text-sm text-red-500">
-                {errors.priority.message}
-              </p>
+              <p className="text-sm text-red-500">{errors.priority.message}</p>
             )}
           </div>
 
           {/* Due Date */}
           <div className="grid gap-3">
             <Label htmlFor="task-due-date">Due Date</Label>
-            <Input
-              id="task-due-date"
-              type="date"
-              {...register("deadline")}
-            />
+            <Input id="task-due-date" type="date" {...register("deadline")} />
             {errors.deadline && (
               <p className="text-sm text-red-500">{errors.deadline.message}</p>
             )}
@@ -279,6 +280,12 @@ export function SheetCreateTask() {
             </SheetClose>
           </SheetFooter>
         </form>
+
+        {/* Dialog to inform user to create a project first */}
+        <CreateProjectRequiredDialog
+          open={showNoProjectsDialog}
+          onOpenChange={setShowNoProjectsDialog}
+        />
       </SheetContent>
     </Sheet>
   );
