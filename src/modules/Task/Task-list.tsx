@@ -16,7 +16,6 @@ import { toast } from "sonner";
 import {
   DndContext,
   closestCenter,
-  KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
@@ -27,7 +26,6 @@ import {
 } from "@dnd-kit/core";
 import {
   SortableContext,
-  sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
@@ -264,15 +262,12 @@ function TaskList() {
     {} as Record<StatusKey, KanbanTask[]>,
   );
 
-  // Sensors for drag and drop
+  // Sensors for drag and drop (pointer-only, keyboard drag disabled)
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 3,
+        distance: 0,
       },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
     }),
   );
 
