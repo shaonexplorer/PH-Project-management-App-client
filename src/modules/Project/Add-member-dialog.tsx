@@ -1,6 +1,13 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { Users } from "lucide-react";
+
 import {
   Dialog,
   DialogClose,
@@ -11,46 +18,42 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus } from "lucide-react";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  addNewProjectMember,
-  addOldProjectMember,
-} from "@/actions/Project/add-member";
-
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getTeamMembers } from "@/actions/team-member";
-import { toast } from "sonner";
-import { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// Schemas
+import {
+  addNewProjectMember,
+  addOldProjectMember,
+} from "@/actions/Project/add-member";
+import { getTeamMembers } from "@/actions/team-member";
+
+// Schema for adding a new member
 const newMemberSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  email: z.email("Invalid email"),
+  email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
+// Schema for adding an existing member
 const existingMemberSchema = z.object({
-  userId: z.string().min(1, "Select a member"),
+  userId: z.string().min(1, "Please select a member"),
 });
 
 export function DialogAddMember({ projectId }: { projectId: string }) {
   const [open, setOpen] = useState(false);
+
+  // Fetch team members for the "Add Existing" tab
   const teamMembers = useQuery({
-    queryKey: ["team-member"],
+    queryKey: ["team-members"],
     queryFn: getTeamMembers,
   });
 
@@ -61,187 +64,204 @@ export function DialogAddMember({ projectId }: { projectId: string }) {
     }),
   );
 
-  const {
-    register: registerNew,
-    handleSubmit: handleNewSubmit,
-    formState: { errors: newErrors },
-    reset: resetNew,
-  } = useForm({
+  // Form for adding a new member
+  const formNew = useForm<z.infer<typeof newMemberSchema>>({
     resolver: zodResolver(newMemberSchema),
-    defaultValues: { name: "", email: "", password: "" },
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+    },
   });
 
-  const {
-    register: registerExisting,
-    handleSubmit: handleExistingSubmit,
-    formState: { errors: existingErrors },
-    reset: resetExisting,
-    setValue,
-  } = useForm({
+  // Form for adding an existing member
+  const formExisting = useForm<z.infer<typeof existingMemberSchema>>({
     resolver: zodResolver(existingMemberSchema),
-    defaultValues: { userId: "" },
+    defaultValues: {
+      userId: "",
+    },
   });
 
   const queryClient = useQueryClient();
 
+  // Mutation for adding a new member
   const addNew = useMutation({
-    mutationFn: (data: { email: string; name: string; password: string }) =>
+    mutationFn: (data: z.infer<typeof newMemberSchema>) =>
       addNewProjectMember({
-        data: { email: data.email, name: data.name, password: data.password },
-        projectId: projectId,
+        data: {
+          name: data.name,
+          email: data.email,
+          password: data.password,
+        },
+        projectId,
       }),
-    onSuccess: (result) => {
-      console.log("Member added successfully:", result);
-      // Optionally close the sheet or reset form here
+    onSuccess: () => {
       setOpen(false);
-      toast.success("Member added succesfully");
-
+      toast.success("Member invited successfully");
+      formNew.reset();
       queryClient.invalidateQueries({ queryKey: ["my-projects"] });
     },
-    onError: (error) => {
-      console.error("Error creating project:", error);
-      toast.error(error.message || "Failed to add member to the project");
+    onError: (error: unknown) => {
+      const message =
+        error instanceof Error ? error.message : "Failed to add member";
+      toast.error(message);
     },
   });
 
+  // Mutation for adding an existing member
   const addOld = useMutation({
-    mutationFn: (data: { userId: string }) =>
+    mutationFn: (data: z.infer<typeof existingMemberSchema>) =>
       addOldProjectMember({
         projectId,
         userId: data.userId,
       }),
-    onSuccess: (result) => {
-      console.log("Member added successfully:", result);
-      // Optionally close the sheet or reset form here
+    onSuccess: () => {
       setOpen(false);
-      toast.success("Member added succesfully");
-
+      toast.success("Member added successfully");
+      formExisting.reset();
       queryClient.invalidateQueries({ queryKey: ["my-projects"] });
     },
-    onError: (error) => {
-      console.error("Error creating project:", error);
-      toast.error(error.message || "Failed to add member to the project");
+    onError: (error: unknown) => {
+      const message =
+        error instanceof Error ? error.message : "Failed to add member";
+      toast.error(message);
     },
   });
 
-  const onAddNew = async (data: z.infer<typeof newMemberSchema>) => {
-    await addNew.mutateAsync(data);
-    resetNew();
+  const onAddNew = (data: z.infer<typeof newMemberSchema>) => {
+    addNew.mutate(data);
   };
 
-  const onAddExisting = async (data: z.infer<typeof existingMemberSchema>) => {
-    await addOld.mutateAsync({ userId: data.userId });
-    resetExisting();
+  const onAddExisting = (data: z.infer<typeof existingMemberSchema>) => {
+    addOld.mutate(data);
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button className="flex items-center gap-1 font-semibold dark:text-[#d3e4fe] text-primary hover:underline underline-offset-4 transform group-hover:translate-x-1 transition-transform duration-300">
+        <Button variant="outline" size="sm" className="gap-1.5">
+          <Users className="h-4 w-4" />
           Add Member
-          <Plus className="w-6 h-6 text-current" />
-        </button>
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Add Member</DialogTitle>
           <DialogDescription>
-            Add an existing user to the project or invite a new member.
+            Add an existing team member or invite a new user to this project.
           </DialogDescription>
         </DialogHeader>
+
         <Tabs defaultValue="existing" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-4">
             <TabsTrigger value="existing">Add Existing</TabsTrigger>
-            <TabsTrigger value="new">Add New</TabsTrigger>
+            <TabsTrigger value="new">Invite New</TabsTrigger>
           </TabsList>
+
+          {/* Add Existing Member */}
           <TabsContent value="existing">
             <form
-              onSubmit={handleExistingSubmit(onAddExisting)}
+              onSubmit={formExisting.handleSubmit(onAddExisting)}
               className="space-y-4"
             >
-              <Label htmlFor="existing-member" className="sr-only">
-                Select Member
-              </Label>
-              <div className="w-full">
+              <div className="grid gap-2">
+                <Label htmlFor="existing-member">Team Member</Label>
                 <Select
-                  onValueChange={(value) => setValue("userId", value)}
+                  onValueChange={(value) => formExisting.setValue("userId", value)}
                   defaultValue=""
                 >
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger>
                     <SelectValue placeholder="Select a member" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectGroup>
-                      {allMembers?.map((m: { id: string; value: string }) => (
-                        <SelectItem key={m.id} value={m.id}>
-                          {m.value}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
+                    {allMembers?.map((m: { id: string; value: string }) => (
+                      <SelectItem key={m.id} value={m.id}>
+                        {m.value}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
-                <input type="hidden" {...registerExisting("userId")} />
+                {formExisting.formState.errors.userId && (
+                  <p className="text-sm text-destructive">
+                    {formExisting.formState.errors.userId.message}
+                  </p>
+                )}
               </div>
-              {existingErrors.userId && (
-                <p className="text-sm text-red-500">
-                  {existingErrors.userId.message}
-                </p>
-              )}
-              <DialogFooter className="sm:justify-end">
+
+              <DialogFooter className="flex gap-2">
                 <DialogClose asChild>
-                  <Button variant="outline" type="button">
+                  <Button type="button" variant="outline">
                     Cancel
                   </Button>
                 </DialogClose>
-                <Button type="submit" disabled={addOld.isPending}>
-                  {addOld.isPending ? "Adding Existing ..." : "Add Existing"}
+                <Button
+                  type="submit"
+                  disabled={addOld.isPending}
+                >
+                  {addOld.isPending ? "Adding..." : "Add Existing"}
                 </Button>
               </DialogFooter>
             </form>
           </TabsContent>
+
+          {/* Invite New Member */}
           <TabsContent value="new">
-            <form onSubmit={handleNewSubmit(onAddNew)} className="space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full">
-                <div className="grid gap-2 flex-1">
-                  <Label htmlFor="name">Name</Label>
-                  <Input id="name" {...registerNew("name")} />
-                  {newErrors.name && (
-                    <p className="text-sm text-red-500">
-                      {newErrors.name.message}
-                    </p>
-                  )}
-                </div>
-                <div className="grid gap-2 flex-1">
-                  <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" {...registerNew("email")} />
-                  {newErrors.email && (
-                    <p className="text-sm text-red-500">
-                      {newErrors.email.message}
-                    </p>
-                  )}
-                </div>
+            <form onSubmit={formNew.handleSubmit(onAddNew)} className="space-y-4">
+              <div className="grid gap-2">
+                <Label htmlFor="name">Name</Label>
+                <Input
+                  id="name"
+                  placeholder="Full name"
+                  {...formNew.register("name")}
+                />
+                {formNew.formState.errors.name && (
+                  <p className="text-sm text-destructive">
+                    {formNew.formState.errors.name.message}
+                  </p>
+                )}
               </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="email@example.com"
+                  {...formNew.register("email")}
+                />
+                {formNew.formState.errors.email && (
+                  <p className="text-sm text-destructive">
+                    {formNew.formState.errors.email.message}
+                  </p>
+                )}
+              </div>
+
               <div className="grid gap-2">
                 <Label htmlFor="password">Password</Label>
                 <Input
                   id="password"
                   type="password"
-                  {...registerNew("password")}
+                  placeholder="Create a password"
+                  {...formNew.register("password")}
                 />
-                {newErrors.password && (
-                  <p className="text-sm text-red-500">
-                    {newErrors.password.message}
+                {formNew.formState.errors.password && (
+                  <p className="text-sm text-destructive">
+                    {formNew.formState.errors.password.message}
                   </p>
                 )}
               </div>
-              <DialogFooter className="sm:justify-end">
+
+              <DialogFooter className="flex gap-2">
                 <DialogClose asChild>
-                  <Button variant="outline" type="button">
+                  <Button type="button" variant="outline">
                     Cancel
                   </Button>
                 </DialogClose>
-                <Button type="submit" disabled={addNew.isPending}>
-                  {addNew.isPending ? "Adding New ..." : "Add New"}
+                <Button
+                  type="submit"
+                  disabled={addNew.isPending}
+                >
+                  {addNew.isPending ? "Inviting..." : "Invite Member"}
                 </Button>
               </DialogFooter>
             </form>

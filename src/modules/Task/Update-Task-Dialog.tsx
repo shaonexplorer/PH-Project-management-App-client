@@ -35,10 +35,7 @@ const taskUpdateSchema = z.object({
   title: z.string().min(1, { message: "Title is required" }),
   description: z.string().optional(),
   priority: z.enum(["Low", "Medium", "High", "Critical"]),
-  deadline: z
-    .string()
-    .refine((val) => !isNaN(Date.parse(val)), { message: "Invalid date" })
-    .optional(),
+  deadline: z.string().optional(),
   status: z.enum(["Todo", "In_Progress", "Completed"]),
 });
 

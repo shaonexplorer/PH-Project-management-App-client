@@ -103,7 +103,13 @@ npm install @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities @dnd-kit/dom
 2. **SortableContext** - Makes a list of items sortable
 3. **useSortable** - Hook for making individual items draggable
 4. **useDroppable** - Hook for making areas droppable (columns)
-5. **Sensors** - Input sensors (PointerSensor for mouse/touch, KeyboardSensor for accessibility)
+5. **Sensors** - Input sensors (PointerSensor for mouse/touch drag-and-drop)
+
+### Current Sensor Configuration
+
+- **PointerSensor** - Enabled with `distance: 0` activation constraint for immediate drag start
+- **KeyboardSensor** - Not currently used (keyboard drag-and-drop disabled)
+- To re-enable keyboard drag: add KeyboardSensor with `sortableKeyboardCoordinates` back to `useSensors()`
 
 ### Components
 
@@ -123,8 +129,10 @@ npm install @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities @dnd-kit/dom
 4. The `handleDragEnd` updates the task status via the `updateTask` API mutation
 
 ### Accessibility
-- Keyboard navigation supported via `KeyboardSensor`
 - Screen reader announcements via dnd-kit's built-in accessibility features
+- **Note**: Keyboard drag-and-drop is currently disabled (KeyboardSensor removed from sensors array)
+- PointerSensor activation constraint uses `distance: 0` for immediate drag start (cursor-card alignment)
+- To enable keyboard drag-and-drop: add `KeyboardSensor` back to the `useSensors()` call
 
 ## Loading Skeletons
 
@@ -137,6 +145,19 @@ The project uses skeleton loaders for smooth loading states:
 Both skeletons use the same styling as their respective card components (colors, borders, rounded corners) but with animated pulse effect for visual feedback during data fetching.
 
 ## Project‑Specific Hooks / Rules
+
+### Documentation Research
+- **Use context7 for library documentation**: When asking about libraries, frameworks, SDKs, APIs, or CLI tools, use `npx ctx7@latest library <name>` to fetch current documentation
+- **Get updated docs**: Use `npx ctx7@latest docs <libraryId>` to get specific documentation for the library
+- **This ensures**: You get the most recent API syntax, configuration, and best practices
+
+### Frontend Development
+- **Use the `/frontend-design` skill**: For improving/fixing UI components, invoke the `frontend-design` skill to get design guidance
+- **Leverage shadcn/ui components**: Prefer shadcn/ui components over custom implementations for consistency
+- **Check available shadcn components**: Use `npx shadcn-ui@latest add <component>` to add new components
+- **Follow existing patterns**: Match the styling and structure of similar dialogs in the project (UpdateTaskDialog, UpdateProjectDialog)
+
+### Code Patterns
 - There are no `.cursor` or Copilot rule files in this repository, so no special linting or AI‑assistant configurations need to be considered.
 - The `README.md` already contains the basic "Getting Started" instructions; the commands above are derived from it and `package.json`.
 
@@ -159,7 +180,8 @@ Both skeletons use the same styling as their respective card components (colors,
 - **Updated**: `src/modules/Project/project-list.tsx` - Pass description and deadline props to project card
 
 ### Add Member to Project Dialog
-- **Created**: `src/modules/Task/Add-member-to-project-dialog.tsx` - Dialog shown when project has no members
+- **Created**: `src/modules/Project/Add-member-dialog.tsx` - Dialog for adding members to projects
+- **Updated**: `src/modules/Project/project-card.tsx` - Integrated add member dialog with button
 - **Updated**: `src/modules/Task/create-task-sheet.tsx` - Automatically shows dialog when selecting a project with no members
 
 ### Key Implementation Details
@@ -187,14 +209,27 @@ Both skeletons use the same styling as their respective card components (colors,
 - Invalidates project queries after successful update
 
 #### Add Member to Project Dialog
-- Uses shadcn/ui Dialog, Input, Label, Select components
-- Two tabs: "Add Existing" (select from team) and "Add New" (invite new member)
-- Zod validation for form fields
-- Uses `useLayoutEffect` to avoid synchronous state update warnings
-- Uses `useRef` to track if dialog has been shown (prevents multiple triggers)
-- Invalidates project member queries after successful addition
-- Automatically shows when a project with no members is selected in the create task sheet
+- Uses shadcn/ui Dialog, Button, Input, Label, Select, Tabs components
+- Two tabs: "Add Existing" (select from team) and "Invite New" (invite new member)
+- React Hook Form with Zod validation for both tabs
+- Uses `Users` icon from lucide-react for the trigger button
+- Toast notifications for success/error feedback
+- Invalidates project queries after successful addition
+- Integrated in `project-card.tsx` with proper Button component styling
+- Error messages use `text-destructive` for proper theming
+
+### Drag-and-Drop Configuration Changes
+
+#### Disabled Keyboard Drag-and-Drop
+- Removed `KeyboardSensor` from the sensors array in `Task-list.tsx`
+- Keyboard-based drag activation (Space/Enter) is no longer available
+- Mouse/touch drag-and-drop via `PointerSensor` still works
+
+#### Fixed Cursor Offset During Drag
+- Changed `PointerSensor` activation constraint `distance` from `3` to `0`
+- This ensures the cursor and moving task card are perfectly aligned when drag starts
+- Previously, the 3px distance caused an offset between cursor position and card position
 
 ---
 
-*Generated on 2026-07-05*
+*Updated on 2026-07-06*
