@@ -131,6 +131,8 @@ function ProjectList() {
                 projectId={project.id}
                 key={project.id}
                 title={project.name}
+                description={project.description}
+                deadline={project.deadline}
                 projectLead={
                   project.projectLead || {
                     name: project.members[0]?.name || "John Doe",
@@ -140,8 +142,6 @@ function ProjectList() {
                 }
                 completionPercentage={project.completionPercentage || 50}
                 daysLeft={project.daysLeft || daysLeft}
-                // Placeholder callbacks – can be wired up later
-                onEdit={() => console.log("Edit", project.id)}
                 onViewDetails={() => console.log("View", project.id)}
               />
             );
