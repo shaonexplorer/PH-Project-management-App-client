@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/select";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 
 import { getTeamMembersByProject } from "@/actions/team-member";
 import { useState } from "react";

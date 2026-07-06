@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 
-import { format } from "date-fns";
+import { format, parse, isValid } from "date-fns";
 import { cn } from "@/lib/utils";
 
 import { UpdateTaskDialog } from "./Update-Task-Dialog";
@@ -9,7 +9,7 @@ import { User } from "lucide-react";
 
 interface TaskCardProps {
   taskId: string;
-  taskStatus: string;
+  taskStatus: "Todo" | "In_Progress" | "Completed";
   title?: string;
   description?: string;
   difficulty?: "Low" | "Medium" | "High";
@@ -140,7 +140,7 @@ export default function TaskCard({
 
           {/* Deadline */}
           <div className="text-xs text-muted-foreground">
-            Due: {format(deadline, "MMM d")}
+            {deadline && `Due: ${format(deadline, "MMM d")}`}
           </div>
         </div>
 
@@ -160,8 +160,24 @@ export default function TaskCard({
             </div>
           </div>
 
-          <UpdateTaskDialog taskId={taskId} currentStatus={taskStatus} />
-          <DeleteTaskConfirmDialog taskId={taskId} taskTitle={title} />
+          <div className="flex items-center gap-2">
+            <UpdateTaskDialog
+              taskId={taskId}
+              currentStatus={taskStatus}
+              currentTitle={title}
+              currentDescription={description}
+              currentPriority={priority}
+              currentDeadline={
+                deadline && isValid(parse(deadline, "MMM d, yyyy", new Date()))
+                  ? format(
+                      parse(deadline, "MMM d, yyyy", new Date()),
+                      "yyyy-MM-dd",
+                    )
+                  : ""
+              }
+            />
+            <DeleteTaskConfirmDialog taskId={taskId} taskTitle={title} />
+          </div>
         </div>
       </Card>
     </div>

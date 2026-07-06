@@ -72,7 +72,7 @@ interface Task {
   id: string;
   title: string;
   description: string;
-  status: string;
+  status: "Todo" | "In_Progress" | "Completed";
   priority?: "Low" | "Medium" | "High" | "Critical";
   dueDate?: string;
   assignee?: {

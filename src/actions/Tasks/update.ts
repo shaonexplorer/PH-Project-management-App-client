@@ -2,7 +2,14 @@
 
 import { cookies } from "next/headers";
 
-export async function updateTask(data: { taskId: string; status: string }) {
+export async function updateTask(data: {
+  taskId: string;
+  status?: string;
+  title?: string;
+  description?: string;
+  priority?: "Low" | "Medium" | "High" | "Critical";
+  deadline?: string;
+}) {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   const cookie = cookies();
@@ -12,7 +19,12 @@ export async function updateTask(data: { taskId: string; status: string }) {
     throw new Error("NEXT_PUBLIC_API_URL is not defined");
   }
 
-  const payload = { status: data.status };
+  const payload: Record<string, unknown> = {};
+  if (data.status !== undefined) payload.status = data.status;
+  if (data.title !== undefined) payload.title = data.title;
+  if (data.description !== undefined) payload.description = data.description;
+  if (data.priority !== undefined) payload.priority = data.priority;
+  if (data.deadline !== undefined) payload.dueDate = data.deadline;
 
   const response = await fetch(`${apiUrl}/tasks/${data.taskId}`, {
     method: "PUT",
