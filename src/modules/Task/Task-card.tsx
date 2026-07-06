@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
 import { UpdateTaskDialog } from "./Update-Task-Dialog";
+import { DeleteTaskConfirmDialog } from "./Delete-Task-Confirm-dialog";
 import { User } from "lucide-react";
 
 interface TaskCardProps {
@@ -114,9 +115,7 @@ export default function TaskCard({
         </div>
 
         {/* Task Summary Description */}
-        <p className="text-sm text-muted-foreground line-clamp-2 flex-1">
-          {description}
-        </p>
+        <p className="text-sm opacity-75 line-clamp-2 flex-1">{description}</p>
 
         {/* Meta Information Row */}
         <div className="flex items-center justify-between gap-3">
@@ -162,6 +161,7 @@ export default function TaskCard({
           </div>
 
           <UpdateTaskDialog taskId={taskId} currentStatus={taskStatus} />
+          <DeleteTaskConfirmDialog taskId={taskId} taskTitle={title} />
         </div>
       </Card>
     </div>

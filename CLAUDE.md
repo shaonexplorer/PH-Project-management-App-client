@@ -53,12 +53,15 @@ src/
 │   │   ├─ task-card-skeleton.tsx # Loading skeleton for task cards
 │   │   ├─ Update-Task-Dialog.tsx # Dialog for updating task status
 │   │   ├─ create-task-sheet.tsx  # Sheet for creating new tasks
-│   │   └─ Create-Project-Required-dialog.tsx # Dialog for no projects
+│   │   ├─ Create-Project-Required-dialog.tsx # Dialog for no projects
+│   │   └─ Add-member-to-project-dialog.tsx # Dialog to add member when project has no members
 │   └─ Project/         # Project management module
 │       ├─ project-list.tsx       # Projects grid view
 │       ├─ project-card.tsx       # Individual project card component
 │       ├─ project-card-skeleton.tsx # Loading skeleton for project cards
-│       └─ Delete-Confirm-dialog.tsx # Delete confirmation dialog
+│       ├─ Delete-Confirm-dialog.tsx # Delete confirmation dialog
+│       ├─ Update-Project-Dialog.tsx # Dialog for editing projects
+│       └─ Add-member-dialog.tsx  # Dialog for adding members to projects
 ├─ lib/                 # Utility functions
 └─ styles/ (globals.css)
 ```
@@ -149,6 +152,16 @@ Both skeletons use the same styling as their respective card components (colors,
 - **Created**: `src/modules/Task/Create-Project-Required-dialog.tsx` - Dialog shown when no projects exist
 - **Updated**: `src/modules/Task/create-task-sheet.tsx` - Added logic to check for projects and show dialog when needed
 
+### Update Project Dialog
+- **Created**: `src/actions/Project/update.ts` - Server action for updating projects
+- **Created**: `src/modules/Project/Update-Project-Dialog.tsx` - Dialog for editing project details
+- **Updated**: `src/modules/Project/project-card.tsx` - Integrated update dialog with edit button
+- **Updated**: `src/modules/Project/project-list.tsx` - Pass description and deadline props to project card
+
+### Add Member to Project Dialog
+- **Created**: `src/modules/Task/Add-member-to-project-dialog.tsx` - Dialog shown when project has no members
+- **Updated**: `src/modules/Task/create-task-sheet.tsx` - Automatically shows dialog when selecting a project with no members
+
 ### Key Implementation Details
 
 #### Delete Confirmation Dialog (Project Cards)
@@ -165,6 +178,22 @@ Both skeletons use the same styling as their respective card components (colors,
 - Includes navigation button to the projects page
 - Prevents task creation without a project
 - Uses shadcn/ui Dialog component with alert icon
+
+#### Update Project Dialog
+- Uses shadcn/ui Dialog, Input, Label, Button components
+- Form with fields for Name, Description, and Deadline
+- TanStack Query mutation for API calls
+- Toast notifications for success/error feedback
+- Invalidates project queries after successful update
+
+#### Add Member to Project Dialog
+- Uses shadcn/ui Dialog, Input, Label, Select components
+- Two tabs: "Add Existing" (select from team) and "Add New" (invite new member)
+- Zod validation for form fields
+- Uses `useLayoutEffect` to avoid synchronous state update warnings
+- Uses `useRef` to track if dialog has been shown (prevents multiple triggers)
+- Invalidates project member queries after successful addition
+- Automatically shows when a project with no members is selected in the create task sheet
 
 ---
 
