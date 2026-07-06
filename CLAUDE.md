@@ -52,11 +52,13 @@ src/
 │   │   ├─ Task-card.tsx          # Individual task card component
 │   │   ├─ task-card-skeleton.tsx # Loading skeleton for task cards
 │   │   ├─ Update-Task-Dialog.tsx # Dialog for updating task status
-│   │   └─ create-task-sheet.tsx  # Sheet for creating new tasks
+│   │   ├─ create-task-sheet.tsx  # Sheet for creating new tasks
+│   │   └─ Create-Project-Required-dialog.tsx # Dialog for no projects
 │   └─ Project/         # Project management module
 │       ├─ project-list.tsx       # Projects grid view
 │       ├─ project-card.tsx       # Individual project card component
-│       └─ project-card-skeleton.tsx # Loading skeleton for project cards
+│       ├─ project-card-skeleton.tsx # Loading skeleton for project cards
+│       └─ Delete-Confirm-dialog.tsx # Delete confirmation dialog
 ├─ lib/                 # Utility functions
 └─ styles/ (globals.css)
 ```
@@ -135,11 +137,34 @@ Both skeletons use the same styling as their respective card components (colors,
 - There are no `.cursor` or Copilot rule files in this repository, so no special linting or AI‑assistant configurations need to be considered.
 - The `README.md` already contains the basic "Getting Started" instructions; the commands above are derived from it and `package.json`.
 
-## Future Claude Code Usage
-- When performing code changes, prefer editing existing components under `src/components/ui/` or adding new feature modules under `src/modules/`.
-- Use the `ThemeProvider` for any UI that depends on dark/light mode.
-- Follow the existing file‑naming conventions (PascalCase for components, kebab‑case for route folders).
-- Run `npm run lint` after modifications to keep the codebase clean.
+## Recent Changes
+
+### Delete Confirmation Dialog for Project Cards
+- **Created**: `src/actions/Project/delete.ts` - Server action for deleting projects
+- **Created**: `src/modules/Project/Delete-Confirm-dialog.tsx` - Delete confirmation dialog component
+- **Updated**: `src/modules/Project/project-card.tsx` - Integrated delete dialog with shadcn/ui Dialog
+- **Updated**: `src/modules/Project/project-list.tsx` - Removed onDelete callback (handled internally)
+
+### Create Project Required Dialog for Tasks
+- **Created**: `src/modules/Task/Create-Project-Required-dialog.tsx` - Dialog shown when no projects exist
+- **Updated**: `src/modules/Task/create-task-sheet.tsx` - Added logic to check for projects and show dialog when needed
+
+### Key Implementation Details
+
+#### Delete Confirmation Dialog (Project Cards)
+- Uses shadcn/ui Dialog component with proper animations
+- Shows confirmation message with project title
+- Displays loading state during deletion
+- Uses toast notifications for user feedback
+- Invalidates project queries after successful deletion
+- Follows the same pattern as UpdateTaskDialog
+
+#### Create Project Required Dialog (Tasks)
+- Alerts users when no projects exist
+- Provides clear guidance to create a project first
+- Includes navigation button to the projects page
+- Prevents task creation without a project
+- Uses shadcn/ui Dialog component with alert icon
 
 ---
 
