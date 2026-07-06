@@ -142,7 +142,6 @@ function ProjectList() {
                 daysLeft={project.daysLeft || daysLeft}
                 // Placeholder callbacks – can be wired up later
                 onEdit={() => console.log("Edit", project.id)}
-                onDelete={() => console.log("Delete", project.id)}
                 onViewDetails={() => console.log("View", project.id)}
               />
             );

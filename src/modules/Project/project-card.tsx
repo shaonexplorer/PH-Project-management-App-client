@@ -1,7 +1,7 @@
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import gsap from "gsap";
-import { Plus, User } from "lucide-react";
 import { DialogAddMember } from "./Add-member-dialog";
+import { DeleteProjectConfirmDialog } from "./Delete-Confirm-dialog";
 
 interface ProjectCardProps {
   projectId: string;
@@ -13,7 +13,6 @@ interface ProjectCardProps {
   completionPercentage?: number;
   daysLeft?: number;
   onEdit?: () => void;
-  onDelete?: () => void;
   onViewDetails?: () => void;
 }
 
@@ -28,7 +27,6 @@ export default function ProjectInfoCard({
   completionPercentage = 75,
   daysLeft = 12,
   onEdit,
-  onDelete,
   onViewDetails,
 }: ProjectCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -100,25 +98,10 @@ export default function ProjectInfoCard({
                   />
                 </svg>
               </button>
-              <button
-                onClick={onDelete}
-                className="w-10 h-10 flex items-center justify-center rounded-full text-secondary-foreground hover:bg-[#ffdad6] hover:text-[#93000a] transition-colors duration-200"
-                title="Delete Project"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                  />
-                </svg>
-              </button>
+              <DeleteProjectConfirmDialog
+                projectId={projectId}
+                projectTitle={title}
+              />
             </div>
           </div>
 
