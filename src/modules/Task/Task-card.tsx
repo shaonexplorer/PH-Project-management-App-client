@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { format, parse, isValid } from "date-fns";
 import { UpdateTaskDialog } from "./Update-Task-Dialog";
 import { DeleteTaskConfirmDialog } from "./Delete-Task-Confirm-dialog";
+import { useCanEdit } from "@/hooks/use-user-role";
 
 interface TaskCardProps {
   taskId: string;
@@ -62,7 +63,7 @@ export default function TaskCard({
   taskId,
   title = "Implement OAuth Authentication",
   description = "Integrate robust security protocols using OAuth 2.0. Ensure multi-provider support including GitHub and Google, with full refresh token rotation logic for enhanced session security.",
-  priority = "Critical",
+  priority = "High",
   deadline = "Oct 24, 2023",
   assignee = {
     name: "Sarah Jenkins",
@@ -74,6 +75,7 @@ export default function TaskCard({
   taskStatus,
 }: TaskCardProps) {
   const statusColors = getStatusColors(taskStatus);
+  const { canEdit } = useCanEdit();
 
   // Calculate progress percentage based on status
   const getProgressPercent = (status: string) => {
@@ -196,24 +198,26 @@ export default function TaskCard({
             </div>
           </div>
 
-          <div className="flex items-center gap-1">
-            <UpdateTaskDialog
-              taskId={taskId}
-              currentStatus={taskStatus}
-              currentTitle={title}
-              currentDescription={description}
-              currentPriority={priority}
-              currentDeadline={
-                deadline && isValid(parse(deadline, "MMM d, yyyy", new Date()))
-                  ? format(
-                      parse(deadline, "MMM d, yyyy", new Date()),
-                      "yyyy-MM-dd",
-                    )
-                  : ""
-              }
-            />
-            <DeleteTaskConfirmDialog taskId={taskId} taskTitle={title} />
-          </div>
+          {canEdit && (
+            <div className="flex items-center gap-1">
+              <UpdateTaskDialog
+                taskId={taskId}
+                currentStatus={taskStatus}
+                currentTitle={title}
+                currentDescription={description}
+                currentPriority={priority === "Critical" ? "High" : priority}
+                currentDeadline={
+                  deadline && isValid(parse(deadline, "MMM d, yyyy", new Date()))
+                    ? format(
+                        parse(deadline, "MMM d, yyyy", new Date()),
+                        "yyyy-MM-dd",
+                      )
+                    : ""
+                }
+              />
+              <DeleteTaskConfirmDialog taskId={taskId} taskTitle={title} />
+            </div>
+          )}
         </div>
       </Card>
     </div>

@@ -95,7 +95,7 @@ export function UpdateTaskDialog({
         status?: string;
         title?: string;
         description?: string;
-        priority?: "Low" | "Medium" | "High";
+        priority?: "Low" | "Medium" | "High" | "Critical";
         dueDate?: string;
       } = { taskId };
 

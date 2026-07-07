@@ -32,6 +32,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { getMyProjects } from "@/actions/Project/get";
 import { CreateProjectRequiredDialog } from "./Create-Project-Required-dialog";
+import { useCanEdit } from "@/hooks/use-user-role";
 import {
   Select,
   SelectContent,
@@ -354,6 +355,7 @@ function TaskList() {
   // Check if any tasks match the current filters
   const hasFilteredTasks = filteredTasks.length > 0;
   const hasAllTasks = apiTasks.length > 0;
+  const { canEdit } = useCanEdit();
 
   return (
     <DndContext
@@ -373,8 +375,8 @@ function TaskList() {
           </div>
           <div className="flex items-center gap-3">
             {!projects?.isLoading && projects?.data?.projects?.length > 0 ? (
-              <SheetCreateTask />
-            ) : !projects?.isLoading ? (
+              canEdit && <SheetCreateTask />
+            ) : !projects?.isLoading && canEdit ? (
               <CreateProjectRequiredDialog />
             ) : null}
             <Select

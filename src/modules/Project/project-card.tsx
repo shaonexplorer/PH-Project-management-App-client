@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { DialogAddMember } from "./Add-member-dialog";
 import { DeleteProjectConfirmDialog } from "./Delete-Confirm-dialog";
 import { UpdateProjectDialog } from "./Update-Project-Dialog";
+import { useCanEdit } from "@/hooks/use-user-role";
 
 interface ProjectCardProps {
   projectId: string;
@@ -71,6 +72,7 @@ export default function ProjectInfoCard({
   const cardRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
   const accentRef = useRef<HTMLDivElement>(null);
+  const { canEdit } = useCanEdit();
 
   // Calculate days left from deadline if not provided
   const calculatedDaysLeft = daysLeft ?? calculateDaysLeft(deadline);
@@ -125,18 +127,20 @@ export default function ProjectInfoCard({
           <h2 className="text-lg font-semibold text-card-foreground leading-tight">
             {title || "Untitled Project"}
           </h2>
-          <div className="flex gap-2">
-            <UpdateProjectDialog
-              projectId={projectId}
-              currentName={title || ""}
-              currentDescription={description}
-              currentDeadline={deadline}
-            />
-            <DeleteProjectConfirmDialog
-              projectId={projectId}
-              projectTitle={title || ""}
-            />
-          </div>
+          {canEdit && (
+            <div className="flex gap-2">
+              <UpdateProjectDialog
+                projectId={projectId}
+                currentName={title || ""}
+                currentDescription={description}
+                currentDeadline={deadline}
+              />
+              <DeleteProjectConfirmDialog
+                projectId={projectId}
+                projectTitle={title || ""}
+              />
+            </div>
+          )}
         </div>
 
         {/* Project Lead Info */}
@@ -196,7 +200,7 @@ export default function ProjectInfoCard({
               {calculatedDaysLeft > 0 ? `${calculatedDaysLeft} days left` : "Deadline passed"}
             </span>
           </div>
-          <DialogAddMember projectId={projectId} />
+          {canEdit && <DialogAddMember projectId={projectId} />}
         </div>
       </div>
     </div>

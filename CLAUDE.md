@@ -230,6 +230,41 @@ Both skeletons use the same styling as their respective card components (colors,
 - This ensures the cursor and moving task card are perfectly aligned when drag starts
 - Previously, the 3px distance caused an offset between cursor position and card position
 
+### Role-Based Access Control
+
+#### User Role Hook
+- Created `src/hooks/use-user-role.ts` with three hooks:
+  - `useUserRole()` - Fetches and returns the user role from cookies
+  - `useIsTeamMember()` - Returns true if user is a Team_Member
+  - `useCanEdit()` - Returns true if user is NOT a Team_Member (for showing/hiding edit buttons)
+
+#### Permissions by Role
+
+| Feature | ProjectManager | Team_Member |
+|---------|---------------|-------------|
+| Project Update | ✅ Enabled | ❌ Disabled |
+| Project Delete | ✅ Enabled | ❌ Disabled |
+| Add Member to Project | ✅ Enabled | ❌ Disabled |
+| Create Project | ✅ Enabled | ❌ Disabled |
+| Create Task | ✅ Enabled | ❌ Disabled |
+| Task Edit (Dialog) | ✅ Enabled | ❌ Disabled |
+| Task Delete | ✅ Enabled | ❌ Disabled |
+| Task Status Update (Drag & Drop) | ✅ Enabled | ✅ Enabled |
+
+#### Files Modified for Role-Based Access Control
+- `src/modules/Project/project-card.tsx` - Hides update, delete, and add member buttons for Team_Member
+- `src/modules/Task/Task-card.tsx` - Hides edit and delete buttons for Team_Member
+- `src/modules/Project/project-list.tsx` - Hides "Create Project" button for Team_Member
+- `src/modules/Task/Task-list.tsx` - Hides "Create Task" button for Team_Member, enables drag-and-drop for all users
+
+### Priority Options Update
+
+#### Removed Critical Priority from Update Task Dialog
+- Removed "Critical" from the `priority` enum in `Update-Task-Dialog.tsx`
+- Priority options now limited to: Low, Medium, High
+- Task card still displays "Critical" priority for existing tasks (colors remain unchanged)
+- When editing a task with "Critical" priority, it's converted to "High" in the dialog
+
 ---
 
 ## Project List Search and Filter

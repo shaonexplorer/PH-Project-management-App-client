@@ -20,6 +20,7 @@ import { getMyProjects } from "@/actions/Project/get";
 import { getTasksByProject } from "@/actions/Tasks/get-by-project";
 import { differenceInDays } from "date-fns";
 import { ListFilter } from "lucide-react";
+import { useCanEdit } from "@/hooks/use-user-role";
 
 interface ProjectWithTasks {
   id: string;
@@ -130,6 +131,7 @@ function ProjectList() {
   // Check if any projects match the current filters
   const hasFilteredProjects = filteredProjects.length > 0;
   const hasAllProjects = allProjects.length > 0;
+  const { canEdit } = useCanEdit();
 
   return (
     <div className="w-full p-4 sm:p-6 bg-card/30 backdrop-blur-sm rounded-2xl border border-border/50">
@@ -139,7 +141,7 @@ function ProjectList() {
           <h1 className="text-2xl font-bold text-foreground">Projects</h1>
         </div>
         <div className="flex items-center gap-3">
-          <SheetCreateProject />
+          {canEdit && <SheetCreateProject />}
 
           <Select
             value={statusFilter}
