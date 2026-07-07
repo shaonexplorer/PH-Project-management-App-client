@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 
 import TaskCard from "./Task-card";
 import { TaskCardSkeleton } from "./task-card-skeleton";
@@ -32,6 +32,16 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { getMyProjects } from "@/actions/Project/get";
 import { CreateProjectRequiredDialog } from "./Create-Project-Required-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ListFilter } from "lucide-react";
 
 // Status definitions with custom colors
 const statusConfig = {
@@ -73,6 +83,7 @@ interface Task {
   status: "Todo" | "In_Progress" | "Completed";
   priority?: "Low" | "Medium" | "High" | "Critical";
   dueDate?: string;
+  projectId?: string;
   assignee?: {
     name: string;
     role?: string;
@@ -204,6 +215,9 @@ function SortableColumn({
 
 function TaskList() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedProject, setSelectedProject] = useState<string | undefined>(
+    undefined,
+  );
   const [draggedTask, setDraggedTask] = useState<KanbanTask | null>(null);
 
   const [user, setUser] = useState<string | null>(null);
@@ -240,12 +254,20 @@ function TaskList() {
   // Get tasks from API
   const apiTasks: KanbanTask[] = (tasks?.data?.tasks || []) as KanbanTask[];
 
-  // Filter tasks based on search
-  const filteredTasks = apiTasks.filter(
-    (t) =>
+  // Filter tasks based on search and project
+  const filteredTasks = apiTasks.filter((t) => {
+    // Search filter
+    const matchesSearch =
       t.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      t.description.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+      t.description.toLowerCase().includes(searchTerm.toLowerCase());
+
+    // Project filter
+    const matchesProject = selectedProject
+      ? t.projectId === selectedProject
+      : true;
+
+    return matchesSearch && matchesProject;
+  });
 
   // Group tasks by status
   const tasksByStatus = Object.keys(statusConfig).reduce(
@@ -329,6 +351,10 @@ function TaskList() {
     queryFn: getMyProjects,
   });
 
+  // Check if any tasks match the current filters
+  const hasFilteredTasks = filteredTasks.length > 0;
+  const hasAllTasks = apiTasks.length > 0;
+
   return (
     <DndContext
       sensors={sensors}
@@ -351,6 +377,34 @@ function TaskList() {
             ) : !projects?.isLoading ? (
               <CreateProjectRequiredDialog />
             ) : null}
+            <Select
+              value={selectedProject ?? "__all__"}
+              onValueChange={(value) =>
+                setSelectedProject(value === "__all__" ? undefined : value)
+              }
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filter by project" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Projects</SelectLabel>
+                  <SelectItem value="__all__">
+                    <span className="flex items-center gap-2">
+                      <ListFilter className="h-4 w-4 text-muted-foreground" />
+                      All Projects
+                    </span>
+                  </SelectItem>
+                  {projects?.data?.projects?.map(
+                    (project: { id: string; name: string }) => (
+                      <SelectItem key={project.id} value={project.id}>
+                        {project.name}
+                      </SelectItem>
+                    ),
+                  )}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
             <div className="relative">
               <input
                 type="text"
@@ -359,19 +413,6 @@ function TaskList() {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full max-w-xs px-4 py-2 text-sm border border-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-project-blue/50 bg-card/50 backdrop-blur-sm transition-all duration-200 placeholder:text-muted-foreground"
               />
-              <svg
-                className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-4.354-4.354A7 7 0 1116.954 16.954z"
-                />
-              </svg>
             </div>
           </div>
         </div>
@@ -394,9 +435,53 @@ function TaskList() {
               );
             })}
           </div>
-        ) : apiTasks.length === 0 ? (
+        ) : !hasAllTasks ? (
           // Show empty state when no tasks exist
           <EmptyTasks />
+        ) : !hasFilteredTasks ? (
+          // Show empty state when no tasks match the filter
+          <div className="flex flex-col items-center justify-center py-16 px-4 text-center w-full">
+            <div className="mb-6 p-4 rounded-full bg-gradient-to-br from-amber-50/50 to-orange-50/50 dark:from-amber-902/30 dark:to-orange-902/30">
+              <svg
+                className="h-12 w-12 text-amber-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v16a1 1 0 01-1 1H4a1 1 0 01-1-1V4z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5v6h6V5H9z"
+                />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-foreground mb-3">
+              No tasks found
+            </h2>
+            <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
+              {selectedProject
+                ? "No tasks found in this project. Try clearing the filter or creating a new task."
+                : "No tasks match your search. Try adjusting your search terms."}
+            </p>
+            {(selectedProject || searchTerm) && (
+              <button
+                onClick={() => {
+                  setSelectedProject(undefined);
+                  setSearchTerm("");
+                }}
+                className="px-4 py-2 text-sm font-medium text-primary border border-primary rounded-lg hover:bg-primary/10 transition-colors"
+              >
+                Clear all filters
+              </button>
+            )}
+          </div>
         ) : (
           // Kanban Columns
           <div className="flex flex-col lg:flex-row gap-6">
@@ -450,7 +535,18 @@ function TaskList() {
                 {apiTasks.length}
               </strong>
             </span>
-            {searchTerm && (
+            {selectedProject && (
+              <span>
+                Project:{" "}
+                <strong className="text-foreground font-medium">
+                  {projects?.data?.projects?.find(
+                    (p: { id: string; name: string }) =>
+                      p.id === selectedProject,
+                  )?.name || "Unknown"}
+                </strong>
+              </span>
+            )}
+            {(searchTerm || selectedProject) && (
               <span>
                 Filtered:{" "}
                 <strong className="text-foreground font-medium">
