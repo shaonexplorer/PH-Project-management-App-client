@@ -388,3 +388,24 @@ Displays in the footer:
    - Progress bar showing the percentage
    - Status badge showing "Completed" (100%) or "Active" (<100%)
    - Color-coded accent bar based on status (green/completed, amber/overdue, blue/on-track)
+
+### Role-Based Task Fetching
+
+#### New Server Action
+- **Created**: `src/actions/Tasks/get-assigned.ts` - Server action to fetch tasks assigned to a team member using the `/tasks/team/{userId}` endpoint
+
+#### Updated Task List Component
+- **Updated**: `src/modules/Task/Task-list.tsx` - Implemented role-based task fetching:
+  - **Project Managers**: Fetch tasks from projects they manage via `getMyTasks()` (`/tasks/user/:userId`)
+  - **Team Members**: Fetch tasks assigned to them via `getAssignedTasks()` (`/tasks/team/:userId`)
+- Uses `useUserRole()` hook to determine the current user's role
+- Query key includes `[user, role]` for proper cache invalidation
+
+#### How It Works
+1. User logs in and their role is fetched from cookies via `useUserRole()` hook
+2. The Kanban board fetches the appropriate tasks based on role:
+   - Project Manager sees all tasks from projects they manage
+   - Team Member sees only tasks assigned to them
+3. Drag-and-drop to update task status works for both roles
+
+*Updated on 2026-07-08*
