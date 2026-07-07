@@ -8,7 +8,9 @@ import { EmptyTasks } from "./empty-tasks";
 import { Separator } from "@/components/ui/separator";
 import { SheetCreateTask } from "./create-task-sheet";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getAssignedTasks } from "@/actions/Tasks/get-assigned";
 import { getMyTasks } from "@/actions/Tasks/get";
+import { useUserRole } from "@/hooks/use-user-role";
 import { updateTask } from "@/actions/Tasks/update";
 import { getCookieByName } from "@/actions/auth/cookie";
 import { toast } from "sonner";
@@ -222,6 +224,7 @@ function TaskList() {
   const [draggedTask, setDraggedTask] = useState<KanbanTask | null>(null);
 
   const [user, setUser] = useState<string | null>(null);
+  const { role, isLoading: roleLoading } = useUserRole();
 
   useEffect(() => {
     const getUser = async () => {
@@ -234,9 +237,19 @@ function TaskList() {
 
   const queryClient = useQueryClient();
 
+  // Fetch tasks based on user role:
+  // - Project Manager: tasks from projects they manage
+  // - Team Member: tasks assigned to them
   const tasks = useQuery({
-    queryKey: ["my-tasks", user],
-    queryFn: () => getMyTasks(user as string),
+    queryKey: ["tasks", user, role],
+    queryFn: () => {
+      if (role === "Project_Manager") {
+        return getMyTasks(user as string);
+      }
+      // Default to assigned tasks for Team_Member or other roles
+      return getAssignedTasks(user as string);
+    },
+    enabled: !!user && !roleLoading,
   });
 
   // Mutation for updating task status via drag and drop
@@ -245,7 +258,7 @@ function TaskList() {
       updateTask({ taskId, status }),
     onSuccess: () => {
       toast.success("Task moved successfully");
-      queryClient.invalidateQueries({ queryKey: ["my-tasks", user] });
+      queryClient.invalidateQueries({ queryKey: ["tasks", user, role] });
     },
     onError: (err: Error) => {
       toast.error(err.message || "Failed to update task");
