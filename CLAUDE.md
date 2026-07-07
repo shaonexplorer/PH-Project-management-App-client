@@ -232,6 +232,60 @@ Both skeletons use the same styling as their respective card components (colors,
 
 ---
 
+## Project List Search and Filter
+
+### Implementation
+
+#### Filtering Controls
+The project list (`src/modules/Project/project-list.tsx`) supports three types of filtering:
+
+1. **Search Filter** - Searches by project name and description (case-insensitive)
+2. **Project Filter** - Dropdown to select a specific project or "All Projects"
+3. **Status Filter** - Dropdown to filter by project status
+
+#### Status Values
+The status filter uses the database enum values from `ProjectStatus`:
+- **Active** - Projects currently in progress
+- **Completed** - Finished projects
+- **On Hold** - Projects paused or on hold
+- **All** - Shows all projects (default)
+
+#### UI Components
+- Uses shadcn/ui `Select` component for project and status dropdowns
+- Uses `ListFilter` icon from lucide-react for the "All Projects" option
+- `SelectGroup` with `SelectLabel` for proper grouping
+
+#### Filtering Logic
+Projects are filtered client-side based on:
+- Search term (matches name or description)
+- Selected project ID
+- Status value
+
+#### Empty States
+- When no projects exist: Shows `EmptyProjects` component
+- When filters yield no results: Shows custom empty state with:
+  - Appropriate messaging based on filter type
+  - "Clear all filters" button when filters are active
+  - SVG illustration with amber color scheme
+
+#### Footer Stats
+Displays in the footer:
+- Total project count
+- Selected project name (when project filter is active)
+- Status (when status filter is active)
+- Filtered count (when any filter is active)
+
+#### How It Works
+1. Projects are fetched via `getMyProjects` query
+2. Tasks are fetched for each project via `getTasksByProject` (5-minute cache)
+3. Completion percentage is calculated from tasks
+4. Client-side filtering is applied based on search, project, and status
+5. Filtered projects are displayed in a responsive grid
+
+*Updated on 2026-07-08*
+
+---
+
 ## Task Filtering by Projects
 
 ### Implementation
