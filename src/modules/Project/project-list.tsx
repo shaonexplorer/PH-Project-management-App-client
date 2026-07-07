@@ -93,7 +93,7 @@ function calculateCompletionPercentage(tasks?: Task[]): number {
     return 0;
   }
   const completedCount = tasks.filter(
-    (task) => task.status === "Completed"
+    (task) => task.status === "Completed",
   ).length;
   return Math.round((completedCount / tasks.length) * 100);
 }
@@ -109,8 +109,13 @@ function ProjectList() {
 
   // Fetch tasks for each project and calculate completion percentage
   const projectTasks = useQuery({
-    queryKey: ["project-tasks", projects?.data?.projects?.map((p: any) => p.id)],
+    queryKey: [
+      "project-tasks",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      projects?.data?.projects?.map((p: any) => p.id),
+    ],
     queryFn: async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const projectIds = projects?.data?.projects?.map((p: any) => p.id) || [];
       const tasksMap: Record<string, Task[]> = {};
 
@@ -119,7 +124,10 @@ function ProjectList() {
           const result = await getTasksByProject(projectId);
           tasksMap[projectId] = result?.tasks || [];
         } catch (error) {
-          console.error(`Failed to fetch tasks for project ${projectId}:`, error);
+          console.error(
+            `Failed to fetch tasks for project ${projectId}:`,
+            error,
+          );
           tasksMap[projectId] = [];
         }
       }
@@ -131,6 +139,7 @@ function ProjectList() {
 
   const filteredProjects = useMemo(() => {
     const projectsData = projects?.data?.projects || mockProjects;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return projectsData.filter((p: any) => {
       const matchesSearch = p.name
         .toLowerCase()
@@ -193,10 +202,12 @@ function ProjectList() {
 
             // Get tasks for this project and calculate completion percentage
             const projectTaskData = projectTasks.data?.[project.id] || [];
-            const calculatedCompletion = calculateCompletionPercentage(projectTaskData);
+            const calculatedCompletion =
+              calculateCompletionPercentage(projectTaskData);
 
             // Use server-provided completion percentage if available, otherwise use calculated
-            const completionPercentage = project.completionPercentage ?? calculatedCompletion;
+            const completionPercentage =
+              project.completionPercentage ?? calculatedCompletion;
 
             return (
               <ProjectInfoCard

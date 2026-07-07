@@ -233,3 +233,32 @@ Both skeletons use the same styling as their respective card components (colors,
 ---
 
 *Updated on 2026-07-06*
+
+## Completion Percentage Implementation
+
+### Server Data Integration for Project Cards
+
+#### New Server Action
+- **Created**: `src/actions/Tasks/get-by-project.ts` - Server action to fetch tasks for a specific project using the `/tasks/project/{projectId}` endpoint
+
+#### Project List Updates
+- **Updated**: `src/modules/Project/project-list.tsx` - Now fetches tasks for each project and calculates completion percentage
+- Added `calculateCompletionPercentage()` function: calculates `(completed tasks / total tasks) * 100`
+- Added React Query to fetch tasks for each project with 5-minute caching
+- Uses server-provided `completionPercentage` if available, otherwise falls back to calculated value from tasks
+
+#### Project Card Updates
+- **Updated**: `src/modules/Project/project-card.tsx` - Improved handling of completion percentage from server data
+- Changed default `completionPercentage` from `75` to `0` for better initial state
+- Added `calculateDaysLeft()` helper to derive days left from deadline
+- Added clamping logic to ensure `completionPercentage` is between 0-100
+- Improved handling of undefined values with proper fallbacks
+- Progress bar and status badge now correctly display calculated completion
+
+#### How It Works
+1. When projects are loaded, tasks are fetched for each project
+2. Completion percentage is calculated based on task status
+3. The project card displays:
+   - Progress bar showing the percentage
+   - Status badge showing "Completed" (100%) or "Active" (<100%)
+   - Color-coded accent bar based on status (green/completed, amber/overdue, blue/on-track)
