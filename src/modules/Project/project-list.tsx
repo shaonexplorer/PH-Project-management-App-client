@@ -64,12 +64,16 @@ function ProjectList() {
   const [selectedProject, setSelectedProject] = useState<string | undefined>(
     undefined,
   );
-  const [statusFilter, setStatusFilter] = useState<"all" | "Active" | "Completed" | "On Hold">("all");
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "Active" | "Completed" | "On Hold"
+  >("all");
 
   const projects = useQuery({
     queryKey: ["my-projects"],
     queryFn: getMyProjects,
   });
+
+  console.log("Projects data:", projects.data);
 
   // Fetch tasks for each project and calculate completion percentage
   const projectTasks = useQuery({
@@ -117,8 +121,7 @@ function ProjectList() {
       const matchesProject = selectedProject ? p.id === selectedProject : true;
 
       // Status filter - all, Active, or Completed
-      const matchesStatus =
-        statusFilter === "all" || p.status === statusFilter;
+      const matchesStatus = statusFilter === "all" || p.status === statusFilter;
 
       return matchesSearch && matchesProject && matchesStatus;
     });
@@ -133,43 +136,18 @@ function ProjectList() {
       {/* Header Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold text-foreground">
-            Projects
-          </h1>
+          <h1 className="text-2xl font-bold text-foreground">Projects</h1>
         </div>
         <div className="flex items-center gap-3">
           <SheetCreateProject />
-          <Select
-            value={selectedProject ?? "__all__"}
-            onValueChange={(value) =>
-              setSelectedProject(value === "__all__" ? undefined : value)
-            }
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by project" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Projects</SelectLabel>
-                <SelectItem value="__all__">
-                  <span className="flex items-center gap-2">
-                    <ListFilter className="h-4 w-4 text-muted-foreground" />
-                    All Projects
-                  </span>
-                </SelectItem>
-                {allProjects?.map(
-                  (project: { id: string; name: string }) => (
-                    <SelectItem key={project.id} value={project.id}>
-                      {project.name}
-                    </SelectItem>
-                  ),
-                )}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+
           <Select
             value={statusFilter}
-            onValueChange={(value) => setStatusFilter(value as "all" | "Active" | "Completed" | "On Hold")}
+            onValueChange={(value) =>
+              setStatusFilter(
+                value as "all" | "Active" | "Completed" | "On Hold",
+              )
+            }
           >
             <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="Filter by status" />
@@ -239,8 +217,8 @@ function ProjectList() {
               {selectedProject
                 ? "No projects found in this project. Try clearing the filter or creating a new project."
                 : statusFilter !== "all"
-                ? "No projects match the selected status. Try clearing the filter or creating a new project."
-                : "No projects match your search. Try adjusting your search terms."}
+                  ? "No projects match the selected status. Try clearing the filter or creating a new project."
+                  : "No projects match your search. Try adjusting your search terms."}
             </p>
             {(selectedProject || searchTerm || statusFilter !== "all") && (
               <button
@@ -273,7 +251,10 @@ function ProjectList() {
               project.completionPercentage ?? calculatedCompletion;
 
             // Clamp completion percentage to 0-100 range
-            completionPercentage = Math.max(0, Math.min(100, completionPercentage));
+            completionPercentage = Math.max(
+              0,
+              Math.min(100, completionPercentage),
+            );
 
             return (
               <ProjectInfoCard
