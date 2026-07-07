@@ -24,7 +24,7 @@ export async function addNewProjectMember({
 
   const payload = {
     name: data.name,
-    email: data.name,
+    email: data.email,
     password: data.password,
   };
 

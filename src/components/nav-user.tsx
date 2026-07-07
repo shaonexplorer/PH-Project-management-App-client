@@ -28,6 +28,7 @@ import { MoonIcon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export function NavUser({
   user,
@@ -49,8 +50,15 @@ export function NavUser({
   const handleLogout = async () => {
     // Implement logout logic here, e.g., call a logout API route or clear auth tokens
     console.log("Logging out...");
-    await logoutAction(); // Call the server action to clear cookies
-    router.push("/login"); // Redirect to login page after logout
+    try {
+      await logoutAction(); // Call the server action to clear cookies
+      // Small delay to ensure cookies are cleared before redirect
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      router.push("/login"); // Redirect to login page after logout
+    } catch (error) {
+      console.error("Logout failed:", error);
+      toast.error("Logout failed. Please try again.");
+    }
   };
 
   useEffect(() => {
