@@ -47,25 +47,36 @@ const getStatusColors = (daysLeft: number, completionPercentage: number) => {
   };
 };
 
+// Calculate days left from deadline
+function calculateDaysLeft(deadline?: string): number {
+  if (!deadline) return 0;
+  return Math.max(0, Math.round(
+    (new Date(deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
+  ));
+}
+
 export default function ProjectInfoCard({
   projectId,
-  title = "Global Brand Refresh",
+  title = "Untitled Project",
   description = "",
   projectLead = {
-    name: "Sarah Jenkins",
-    avatarUrl:
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150",
+    name: "Unassigned",
+    avatarUrl: "/avatars/default-avatar.png",
   },
-  completionPercentage = 75,
-  daysLeft = 12,
-  deadline = "",
+  completionPercentage = 0,
+  daysLeft,
+  deadline,
   onViewDetails,
 }: ProjectCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
   const accentRef = useRef<HTMLDivElement>(null);
 
-  const statusColors = getStatusColors(daysLeft, completionPercentage);
+  // Calculate days left from deadline if not provided
+  const calculatedDaysLeft = daysLeft ?? calculateDaysLeft(deadline);
+  const actualCompletion = Math.max(0, Math.min(100, completionPercentage ?? 0));
+
+  const statusColors = getStatusColors(calculatedDaysLeft, actualCompletion);
 
   useEffect(() => {
     // --- Entrance Animation Sequence ---
@@ -92,7 +103,7 @@ export default function ProjectInfoCard({
     });
 
     return () => ctx.revert(); // Clean up GSAP timelines on unmount
-  }, [completionPercentage]);
+  }, [actualCompletion]);
 
   return (
     <div className="hover:shadow-xl transition-shadow duration-300">
@@ -155,10 +166,10 @@ export default function ProjectInfoCard({
                   statusColors.badge,
                 )}
               >
-                {completionPercentage >= 100 ? "Completed" : "Active"}
+                {actualCompletion >= 100 ? "Completed" : "Active"}
               </span>
               <span className="text-sm text-muted-foreground">
-                {completionPercentage}% Complete
+                {actualCompletion}% Complete
               </span>
             </div>
           </div>
@@ -167,13 +178,13 @@ export default function ProjectInfoCard({
               ref={progressBarRef}
               className={cn(
                 "h-full rounded-full transition-all duration-1000 ease-out",
-                completionPercentage >= 100
+                actualCompletion >= 100
                   ? "bg-status-completed"
-                  : completionPercentage >= 50
+                  : actualCompletion >= 50
                     ? "bg-primary"
                     : "bg-amber-500",
               )}
-              style={{ width: `${Math.min(completionPercentage, 100)}%` }}
+              style={{ width: `${Math.min(actualCompletion, 100)}%` }}
             />
           </div>
         </div>
@@ -182,7 +193,7 @@ export default function ProjectInfoCard({
         <div className="flex justify-between items-center pt-3 border-t border-border/30 mt-auto">
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground font-medium">
-              {daysLeft > 0 ? `${daysLeft} days left` : "Deadline passed"}
+              {calculatedDaysLeft > 0 ? `${calculatedDaysLeft} days left` : "Deadline passed"}
             </span>
           </div>
           <DialogAddMember projectId={projectId} />

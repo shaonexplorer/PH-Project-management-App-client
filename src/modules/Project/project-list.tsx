@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Plus } from "lucide-react";
 import ProjectInfoCard from "./project-card";
 import { ProjectCardSkeleton } from "./project-card-skeleton";
@@ -17,13 +17,41 @@ import { Separator } from "@/components/ui/separator";
 import { SheetCreateProject } from "./Create-Project-sheet";
 import { useQuery } from "@tanstack/react-query";
 import { getMyProjects } from "@/actions/Project/get";
+import { getTasksByProject } from "@/actions/Tasks/get-by-project";
 import { differenceInDays } from "date-fns";
 
+interface ProjectWithTasks {
+  id: string;
+  name: string;
+  description?: string;
+  deadline?: string;
+  projectLead?: {
+    name: string;
+    avatarUrl: string;
+  };
+  members?: Array<{
+    name: string;
+    avatarUrl?: string;
+  }>;
+  completionPercentage?: number;
+  daysLeft?: number;
+  status?: string;
+  tasks?: Array<{
+    id: string;
+    status: "Todo" | "In_Progress" | "Completed";
+  }>;
+}
+
+interface Task {
+  id: string;
+  status: "Todo" | "In_Progress" | "Completed";
+}
+
 // Mock project data – replace with real API/data source later
-const mockProjects = [
+const mockProjects: ProjectWithTasks[] = [
   {
-    id: 1,
-    title: "Global Brand Refresh",
+    id: "1",
+    name: "Global Brand Refresh",
     projectLead: {
       name: "Sarah Jenkins",
       avatarUrl:
@@ -34,8 +62,8 @@ const mockProjects = [
     status: "active",
   },
   {
-    id: 2,
-    title: "Mobile App Redesign",
+    id: "2",
+    name: "Mobile App Redesign",
     projectLead: {
       name: "Alex Lee",
       avatarUrl:
@@ -46,8 +74,8 @@ const mockProjects = [
     status: "on-hold",
   },
   {
-    id: 3,
-    title: "Quarterly Reporting",
+    id: "3",
+    name: "Quarterly Reporting",
     projectLead: {
       name: "Mia Patel",
       avatarUrl:
@@ -59,22 +87,58 @@ const mockProjects = [
   },
 ];
 
+// Calculate completion percentage from tasks
+function calculateCompletionPercentage(tasks?: Task[]): number {
+  if (!tasks || tasks.length === 0) {
+    return 0;
+  }
+  const completedCount = tasks.filter(
+    (task) => task.status === "Completed"
+  ).length;
+  return Math.round((completedCount / tasks.length) * 100);
+}
+
 function ProjectList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState("all");
-
-  const filteredProjects = mockProjects.filter((p) => {
-    const matchesSearch = p.title
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const matchesFilter = filter === "all" || p.status === filter;
-    return matchesSearch && matchesFilter;
-  });
 
   const projects = useQuery({
     queryKey: ["my-projects"],
     queryFn: getMyProjects,
   });
+
+  // Fetch tasks for each project and calculate completion percentage
+  const projectTasks = useQuery({
+    queryKey: ["project-tasks", projects?.data?.projects?.map((p: any) => p.id)],
+    queryFn: async () => {
+      const projectIds = projects?.data?.projects?.map((p: any) => p.id) || [];
+      const tasksMap: Record<string, Task[]> = {};
+
+      for (const projectId of projectIds) {
+        try {
+          const result = await getTasksByProject(projectId);
+          tasksMap[projectId] = result?.tasks || [];
+        } catch (error) {
+          console.error(`Failed to fetch tasks for project ${projectId}:`, error);
+          tasksMap[projectId] = [];
+        }
+      }
+      return tasksMap;
+    },
+    enabled: !!projects?.data?.projects?.length,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  const filteredProjects = useMemo(() => {
+    const projectsData = projects?.data?.projects || mockProjects;
+    return projectsData.filter((p: any) => {
+      const matchesSearch = p.name
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+      const matchesFilter = filter === "all" || p.status === filter;
+      return matchesSearch && matchesFilter;
+    });
+  }, [projects?.data?.projects, searchTerm, filter]);
 
   // console.log({ projects: projects?.data?.projects });
 
@@ -111,21 +175,29 @@ function ProjectList() {
 
       {/* Project cards grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-        {projects.isLoading ? (
+        {projects.isLoading || projectTasks.isLoading ? (
           // Show skeleton loaders while loading
           Array.from({ length: 6 }).map((_, index) => (
             <ProjectCardSkeleton key={index} />
           ))
-        ) : projects?.data?.projects?.length === 0 ? (
+        ) : filteredProjects.length === 0 ? (
           // Show empty state when no projects exist
           <EmptyProjects />
         ) : (
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          projects?.data?.projects.map((project: any) => {
+          filteredProjects.map((project: any) => {
             const daysLeft = differenceInDays(
               new Date(project.deadline),
               new Date(),
             );
+
+            // Get tasks for this project and calculate completion percentage
+            const projectTaskData = projectTasks.data?.[project.id] || [];
+            const calculatedCompletion = calculateCompletionPercentage(projectTaskData);
+
+            // Use server-provided completion percentage if available, otherwise use calculated
+            const completionPercentage = project.completionPercentage ?? calculatedCompletion;
+
             return (
               <ProjectInfoCard
                 projectId={project.id}
@@ -135,13 +207,14 @@ function ProjectList() {
                 deadline={project.deadline}
                 projectLead={
                   project.projectLead || {
-                    name: project.members[0]?.name || "John Doe",
+                    name: project.members?.[0]?.name || "John Doe",
                     avatarUrl:
+                      project.members?.[0]?.avatarUrl ||
                       "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150",
                   }
                 }
-                completionPercentage={project.completionPercentage || 50}
-                daysLeft={project.daysLeft || daysLeft}
+                completionPercentage={completionPercentage}
+                daysLeft={project.daysLeft ?? daysLeft}
                 onViewDetails={() => console.log("View", project.id)}
               />
             );
