@@ -34,7 +34,7 @@ import { getCookieByName } from "@/actions/auth/cookie";
 const taskUpdateSchema = z.object({
   title: z.string().min(1, { message: "Title is required" }),
   description: z.string().optional(),
-  priority: z.enum(["Low", "Medium", "High", "Critical"]),
+  priority: z.enum(["Low", "Medium", "High"]),
   deadline: z.string().optional(),
   status: z.enum(["Todo", "In_Progress", "Completed"]),
 });
@@ -46,7 +46,7 @@ interface UpdateTaskDialogProps {
   currentStatus: "Todo" | "In_Progress" | "Completed";
   currentTitle?: string;
   currentDescription?: string;
-  currentPriority?: "Low" | "Medium" | "High" | "Critical";
+  currentPriority?: "Low" | "Medium" | "High";
   currentDeadline?: string;
 }
 
@@ -95,7 +95,7 @@ export function UpdateTaskDialog({
         status?: string;
         title?: string;
         description?: string;
-        priority?: "Low" | "Medium" | "High" | "Critical";
+        priority?: "Low" | "Medium" | "High";
         dueDate?: string;
       } = { taskId };
 
@@ -148,7 +148,6 @@ export function UpdateTaskDialog({
     { value: "Low", label: "Low", color: "text-emerald-500" },
     { value: "Medium", label: "Medium", color: "text-amber-500" },
     { value: "High", label: "High", color: "text-orange-500" },
-    { value: "Critical", label: "Critical", color: "text-destructive" },
   ];
 
   return (
@@ -217,7 +216,7 @@ export function UpdateTaskDialog({
           <div className="grid gap-2">
             <Label htmlFor="task-priority">Priority</Label>
             <Select
-              onValueChange={(value: "Low" | "Medium" | "High" | "Critical") =>
+              onValueChange={(value: "Low" | "Medium" | "High") =>
                 setValue("priority", value)
               }
               defaultValue={currentPriority}
