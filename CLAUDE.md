@@ -232,7 +232,44 @@ Both skeletons use the same styling as their respective card components (colors,
 
 ---
 
-*Updated on 2026-07-06*
+## Task Filtering by Projects
+
+### Implementation
+
+#### Task Interface Update
+- **Updated**: `src/modules/Task/Task-list.tsx` - Added `projectId?: string` field to the `Task` interface to support project association
+
+#### Project Filter Dropdown
+- **Updated**: `src/modules/Task/Task-list.tsx` - Added a project filter dropdown using shadcn/ui Select component
+- The dropdown allows filtering tasks by project or selecting "All Projects"
+- Uses `ListFilter` icon from lucide-react for the "All Projects" option
+- Properly wrapped in `SelectGroup` with `SelectLabel` as required by radix-ui
+
+#### Filtering Logic
+- **Updated**: `src/modules/Task/Task-list.tsx` - Combined search and project filters
+- When a project is selected, only tasks belonging to that project are displayed
+- Search filter works in conjunction with project filter
+- "Clear all filters" button appears when filters are active
+
+#### Empty State Handling
+- **Updated**: `src/modules/Task/Task-list.tsx` - Added custom empty state for filtered results
+- Shows appropriate messaging when no tasks match the current filters
+- Suggests either clearing filters or creating a new task
+
+#### Footer Stats Enhancement
+- **Updated**: `src/modules/Task/Task-list.tsx` - Shows selected project name in the stats footer
+- Displays filtered count when filters are active
+
+### How It Works
+1. Projects are fetched via `getMyProjects` query
+2. Tasks are fetched via `getMyTasks` query
+3. Tasks are filtered client-side based on:
+   - Search term (title or description match)
+   - Selected project ID match
+4. Filtered tasks are grouped by status and displayed in Kanban columns
+5. Stats footer shows total tasks, selected project, and filtered count
+
+*Updated on 2026-07-08*
 
 ## Completion Percentage Implementation
 
