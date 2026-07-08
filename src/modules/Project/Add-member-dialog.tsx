@@ -21,20 +21,21 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Combobox,
+  ComboboxInput,
+  ComboboxContent,
+  ComboboxList,
+  ComboboxItem,
+  ComboboxEmpty,
+} from "@/components/ui/combobox";
 
 import {
   addNewProjectMember,
   addOldProjectMember,
 } from "@/actions/Project/add-member";
-import { getTeamMembers } from "@/actions/team-member";
+import { getTeamMembersByProject } from "@/actions/team-member";
 
 // Schema for adding a new member
 const newMemberSchema = z.object({
@@ -48,21 +49,35 @@ const existingMemberSchema = z.object({
   userId: z.string().min(1, "Please select a member"),
 });
 
+// Type for team member
+interface TeamMember {
+  id: string;
+  name: string;
+  email: string;
+  label: string;
+}
+
 export function DialogAddMember({ projectId }: { projectId: string }) {
   const [open, setOpen] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
 
   // Fetch team members for the "Add Existing" tab
   const teamMembers = useQuery({
-    queryKey: ["team-members"],
-    queryFn: getTeamMembers,
+    queryKey: ["team-members", projectId],
+    queryFn: () => getTeamMembersByProject(projectId),
   });
 
-  const allMembers = teamMembers?.data?.members.map(
-    (m: { id: string; name: string }) => ({
-      id: m.id,
-      value: m.name,
-    }),
-  );
+  console.log("teamMembers", teamMembers.data?.members);
+
+  const allMembers: TeamMember[] =
+    teamMembers?.data?.members.map(
+      (m: { user: { id: string; name: string; email: string } }) => ({
+        id: m.user.id,
+        name: m.user.name,
+        email: m.user.email,
+        label: `${m.user.name} (${m.user.email})`,
+      }),
+    ) || [];
 
   // Form for adding a new member
   const formNew = useForm<z.infer<typeof newMemberSchema>>({
@@ -136,6 +151,12 @@ export function DialogAddMember({ projectId }: { projectId: string }) {
     addOld.mutate(data);
   };
 
+  const handleSelectMember = (member: TeamMember) => {
+    // Stop propagation to prevent dialog close
+    setSelectedMember(member);
+    formExisting.setValue("userId", member.id);
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -166,21 +187,46 @@ export function DialogAddMember({ projectId }: { projectId: string }) {
             >
               <div className="grid gap-2">
                 <Label htmlFor="existing-member">Team Member</Label>
-                <Select
-                  onValueChange={(value) => formExisting.setValue("userId", value)}
-                  defaultValue=""
+                <Combobox
+                  items={allMembers}
+                  value={selectedMember?.name ?? ""}
+                  onValueChange={(value) => {
+                    if (value) {
+                      const member = allMembers.find((m) => m.name === value);
+                      if (member) {
+                        handleSelectMember(member);
+                      }
+                    }
+                  }}
+                  itemToStringValue={(item) => {
+                    if (!item) return "";
+                    if (typeof item === "string") return item;
+                    return (item as TeamMember).name;
+                  }}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a member" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {allMembers?.map((m: { id: string; value: string }) => (
-                      <SelectItem key={m.id} value={m.id}>
-                        {m.value}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  <ComboboxInput placeholder="Search by name or email..." />
+                  <ComboboxContent className="pointer-events-auto!">
+                    <ComboboxEmpty>No members found.</ComboboxEmpty>
+                    <ComboboxList>
+                      {allMembers.map((item) => (
+                        <ComboboxItem
+                          key={item.id}
+                          value={item.name}
+                          onSelect={() => handleSelectMember(item)}
+                        >
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium">
+                              {item.name}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {item.email}
+                            </span>
+                          </div>
+                        </ComboboxItem>
+                      ))}
+                    </ComboboxList>
+                  </ComboboxContent>
+                </Combobox>
                 {formExisting.formState.errors.userId && (
                   <p className="text-sm text-destructive">
                     {formExisting.formState.errors.userId.message}
@@ -194,10 +240,7 @@ export function DialogAddMember({ projectId }: { projectId: string }) {
                     Cancel
                   </Button>
                 </DialogClose>
-                <Button
-                  type="submit"
-                  disabled={addOld.isPending}
-                >
+                <Button type="submit" disabled={addOld.isPending}>
                   {addOld.isPending ? "Adding..." : "Add Existing"}
                 </Button>
               </DialogFooter>
@@ -206,7 +249,10 @@ export function DialogAddMember({ projectId }: { projectId: string }) {
 
           {/* Invite New Member */}
           <TabsContent value="new">
-            <form onSubmit={formNew.handleSubmit(onAddNew)} className="space-y-4">
+            <form
+              onSubmit={formNew.handleSubmit(onAddNew)}
+              className="space-y-4"
+            >
               <div className="grid gap-2">
                 <Label htmlFor="name">Name</Label>
                 <Input
@@ -257,10 +303,7 @@ export function DialogAddMember({ projectId }: { projectId: string }) {
                     Cancel
                   </Button>
                 </DialogClose>
-                <Button
-                  type="submit"
-                  disabled={addNew.isPending}
-                >
+                <Button type="submit" disabled={addNew.isPending}>
                   {addNew.isPending ? "Inviting..." : "Invite Member"}
                 </Button>
               </DialogFooter>
