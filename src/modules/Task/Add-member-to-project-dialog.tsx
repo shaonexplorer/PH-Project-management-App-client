@@ -18,15 +18,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-} from "@/components/ui/select";
+  Combobox,
+  ComboboxInput,
+  ComboboxContent,
+  ComboboxList,
+  ComboboxItem,
+  ComboboxEmpty,
+} from "@/components/ui/combobox";
 import { UserPlus, AlertCircle } from "lucide-react";
-import { getTeamMembers } from "@/actions/team-member";
+import { getTeamMembers, getTeamMembersByProject } from "@/actions/team-member";
 import {
   addNewProjectMember,
   addOldProjectMember,
@@ -62,14 +62,15 @@ export function AddMemberToProjectDialog({
   const [activeTab, setActiveTab] = useState<"existing" | "new">("existing");
 
   const teamMembers = useQuery({
-    queryKey: ["team-member"],
-    queryFn: getTeamMembers,
+    queryKey: ["team-member", projectId],
+    queryFn: () => getTeamMembersByProject(projectId),
   });
 
   const allMembers = teamMembers?.data?.members.map(
-    (m: { id: string; name: string }) => ({
-      id: m.id,
-      value: m.name,
+    (m: { user: { id: string; name: string; email: string } }) => ({
+      id: m.user.id,
+      name: m.user.name,
+      email: m.user.email,
     }),
   );
 
@@ -89,10 +90,13 @@ export function AddMemberToProjectDialog({
     formState: { errors: existingErrors },
     reset: resetExisting,
     setValue,
+    watch,
   } = useForm({
     resolver: zodResolver(existingMemberSchema),
     defaultValues: { userId: "" },
   });
+
+  const selectedUserId = watch("userId");
 
   const queryClient = useQueryClient();
 
@@ -204,25 +208,34 @@ export function AddMemberToProjectDialog({
                 <Label htmlFor="existing-member" className="sr-only">
                   Select Member
                 </Label>
-                <Select
-                  onValueChange={(value) => setValue("userId", value)}
-                  defaultValue=""
+                <Combobox
+                  value={selectedUserId ?? ""}
+                  onValueChange={(value) => {
+                    setValue("userId", value as string);
+                  }}
                 >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a member" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
+                  <ComboboxInput id="existing-member" placeholder="Select a member" />
+                  <ComboboxContent>
+                    <ComboboxEmpty>No members found</ComboboxEmpty>
+                    <ComboboxList>
                       {allMembers?.map(
-                        (member: { id: string; value: string }) => (
-                          <SelectItem key={member.id} value={member.id}>
-                            {member.value}
-                          </SelectItem>
+                        (member: { id: string; name: string; email: string }) => (
+                          <ComboboxItem
+                            key={member.id}
+                            value={member.id}
+                          >
+                            <div className="flex flex-col">
+                              <span className="font-medium">{member.name}</span>
+                              <span className="text-sm text-muted-foreground">
+                                {member.email}
+                              </span>
+                            </div>
+                          </ComboboxItem>
                         ),
                       )}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
+                    </ComboboxList>
+                  </ComboboxContent>
+                </Combobox>
                 <input type="hidden" {...registerExisting("userId")} />
               </div>
               {existingErrors.userId && (
