@@ -44,7 +44,7 @@ src/
 │       └─ dashboard/page.tsx
 ├─ components/          # Reusable UI components
 │   ├─ ui/              # shadcn primitives (button, input, …)
-│   ├─ app-sidebar.tsx
+│   │   ├─ combobox.tsx  # shadcn-style combobox using @base-ui/react
 │   └─ nav-*.tsx        # Navigation components
 ├─ modules/             # Feature‑level modules (auth, theme, task, …)
 │   ├─ Task/            # Task management module
@@ -65,6 +65,14 @@ src/
 ├─ lib/                 # Utility functions
 └─ styles/ (globals.css)
 ```
+
+### Available shadcn/ui Components
+
+The project includes a custom shadcn-style Combobox component at `src/components/ui/combobox.tsx` built with `@base-ui/react`. Available components include:
+- **Combobox** - Searchable dropdown with text input (uses @base-ui/react)
+- **Button, Input, Card, Dialog, Select, Tabs, etc.** - Standard shadcn/ui primitives
+
+When implementing dropdowns with search/filtering, prefer the custom Combobox over Select for better user experience.
 
 ## Authentication
 
@@ -217,6 +225,18 @@ Both skeletons use the same styling as their respective card components (colors,
 - Invalidates project queries after successful addition
 - Integrated in `project-card.tsx` with proper Button component styling
 - Error messages use `text-destructive` for proper theming
+
+#### Add Member Dialog Updated to use ComboBox
+- **Updated**: `src/modules/Task/Add-member-to-project-dialog.tsx` - Replaced Select with shadcn/ui Combobox component
+- Uses `Combobox`, `ComboboxInput`, `ComboboxContent`, `ComboboxList`, `ComboboxItem` components
+- Shows member name and email in each item (improved from just value)
+- Supports text filtering/search within the dropdown
+- Has clear button to reset selection
+- Shows "No members found" when the list is empty
+- Has placeholder text "Select a member"
+- Better accessibility with proper ARIA attributes from @base-ui/react
+
+*Updated on 2026-07-08*
 
 ### Drag-and-Drop Configuration Changes
 
