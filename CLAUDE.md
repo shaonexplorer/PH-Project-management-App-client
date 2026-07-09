@@ -159,6 +159,13 @@ Both skeletons use the same styling as their respective card components (colors,
 - **Get updated docs**: Use `npx ctx7@latest docs <libraryId>` to get specific documentation for the library
 - **This ensures**: You get the most recent API syntax, configuration, and best practices
 
+### Component Library Research
+- **Use the shadcn MCP/skill**: When working with shadcn/ui components or asking about component usage, invoke the `shadcn` skill to get component documentation, examples, and API references
+- **Check installed components first**: Use `npx shadcn@latest info` to see what components are already installed
+- **Get component docs**: Use `npx shadcn@latest docs <component>` to get documentation URLs for any component
+- **Add new components**: Use `npx shadcn@latest add <component>` to add new UI components to the project
+- **Search registries**: Use `npx shadcn@latest search <query>` to find components in configured registries
+
 ### Frontend Development
 - **Use the `/frontend-design` skill**: For improving/fixing UI components, invoke the `frontend-design` skill to get design guidance
 - **Leverage shadcn/ui components**: Prefer shadcn/ui components over custom implementations for consistency
