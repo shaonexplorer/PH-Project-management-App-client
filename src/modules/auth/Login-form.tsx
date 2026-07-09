@@ -16,11 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Field,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { loginAction } from "@/actions/auth/login";
@@ -42,7 +38,10 @@ export function LoginForm({ className }: { className?: string }) {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm({ resolver: zodResolver(loginSchema) });
+  } = useForm({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: "abir@gmail.com", password: "123456789" },
+  });
 
   const mutation = useMutation({
     mutationFn: loginAction,
@@ -106,7 +105,10 @@ export function LoginForm({ className }: { className?: string }) {
               </Field>
               <Field>
                 <div className="flex items-center justify-between">
-                  <FieldLabel htmlFor="password" className="text-sm font-medium">
+                  <FieldLabel
+                    htmlFor="password"
+                    className="text-sm font-medium"
+                  >
                     Password
                   </FieldLabel>
                   <Link
@@ -149,11 +151,7 @@ export function LoginForm({ className }: { className?: string }) {
                 >
                   {mutation.isPending ? "Signing in..." : "Sign in"}
                 </Button>
-                <Button
-                  variant="outline"
-                  type="button"
-                  className="w-full"
-                >
+                <Button variant="outline" type="button" className="w-full">
                   <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
                     <path
                       fill="currentColor"
@@ -164,7 +162,10 @@ export function LoginForm({ className }: { className?: string }) {
                 </Button>
                 <p className="text-center text-sm text-muted-foreground">
                   Don&apos;t have an account?{" "}
-                  <Link href="/signup" className="text-project-blue hover:underline font-medium">
+                  <Link
+                    href="/signup"
+                    className="text-project-blue hover:underline font-medium"
+                  >
                     Sign up
                   </Link>
                 </p>
