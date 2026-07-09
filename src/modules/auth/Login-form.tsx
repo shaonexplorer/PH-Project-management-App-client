@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/card";
 import {
   Field,
-  FieldDescription,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
@@ -28,10 +27,7 @@ import { loginAction } from "@/actions/auth/login";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-export function LoginForm({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+export function LoginForm({ className }: { className?: string }) {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
@@ -52,7 +48,7 @@ export function LoginForm({
     mutationFn: loginAction,
     onSuccess: () => {
       toast.success("Welcome back!");
-      router.replace("/dashboard");
+      router.push("/dashboard");
     },
     onError: (error) => {
       toast.error((error as Error).message || "Login failed");
@@ -60,11 +56,11 @@ export function LoginForm({
   });
 
   const onSubmit = async (data: { email: string; password: string }) => {
-    const result = await mutation.mutateAsync(data);
+    await mutation.mutateAsync(data);
   };
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className={cn("flex flex-col gap-6", className)}>
       {/* Logo/Branding area */}
       <div className="flex flex-col items-center text-center">
         <div className="w-12 h-12 rounded-xl bg-project-blue/10 flex items-center justify-center mb-3">
@@ -121,31 +117,29 @@ export function LoginForm({
                   </Link>
                 </div>
 
-                <>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="••••••••"
-                      className="pl-10 pr-10"
-                      {...register("password")}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword((v) => !v)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                      tabIndex={-1}
-                    >
-                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                    </button>
-                  </div>
-                  {errors.password && (
-                    <p className="text-sm text-destructive mt-1">
-                      {errors.password.message}
-                    </p>
-                  )}
-                </>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    className="pl-10 pr-10"
+                    {...register("password")}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+                {errors.password && (
+                  <p className="text-sm text-destructive mt-1">
+                    {errors.password.message}
+                  </p>
+                )}
               </Field>
               <Field className="flex flex-col gap-3">
                 <Button

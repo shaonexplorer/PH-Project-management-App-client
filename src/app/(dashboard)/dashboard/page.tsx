@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getMyTasks } from "@/actions/Tasks/get";
 import { getMyProjects } from "@/actions/Project/get";
-import { getCookieByName } from "@/actions/auth/cookie";
+import { getCurrentUser } from "@/actions/auth/get-user";
 import {
   StatCard,
   TaskProgressChart,
@@ -52,12 +52,12 @@ interface Project {
 }
 
 function Page() {
-  const [user, setUser] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const getUser = async () => {
-      const id = await getCookieByName("userId");
-      setUser(id);
+      const user = await getCurrentUser();
+      setUserId(user?.id || null);
     };
 
     getUser();
@@ -65,16 +65,16 @@ function Page() {
 
   // Fetch tasks
   const tasksQuery = useQuery({
-    queryKey: ["my-tasks", user],
-    queryFn: () => getMyTasks(user as string),
-    enabled: !!user,
+    queryKey: ["my-tasks", userId],
+    queryFn: () => getMyTasks(userId as string),
+    enabled: !!userId,
   });
 
   // Fetch projects
   const projectsQuery = useQuery({
     queryKey: ["my-projects"],
     queryFn: getMyProjects,
-    enabled: !!user,
+    enabled: !!userId,
   });
 
   // Calculate statistics
