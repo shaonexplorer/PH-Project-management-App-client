@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -29,7 +29,6 @@ import {
   SelectGroup,
   SelectItem,
 } from "@/components/ui/select";
-import { getCookieByName } from "@/actions/auth/cookie";
 
 const taskUpdateSchema = z.object({
   title: z.string().min(1, { message: "Title is required" }),
@@ -59,7 +58,6 @@ export function UpdateTaskDialog({
   currentDeadline = "",
 }: UpdateTaskDialogProps) {
   const [open, setOpen] = useState(false);
-  const [user, setUser] = useState<string | null>(null);
 
   const {
     register,
@@ -76,15 +74,6 @@ export function UpdateTaskDialog({
       status: currentStatus,
     },
   });
-
-  useEffect(() => {
-    const getUser = async () => {
-      const id = await getCookieByName("userId");
-      setUser(id);
-    };
-
-    getUser();
-  }, []);
 
   const queryClient = useQueryClient();
 
@@ -123,8 +112,10 @@ export function UpdateTaskDialog({
     onSuccess: () => {
       toast.success("Task updated successfully");
       setOpen(false);
-      // Invalidate any task list queries so UI refreshes.
-      queryClient.invalidateQueries({ queryKey: ["my-tasks", user] });
+      // Invalidate task queries - both Kanban and dashboard patterns
+      // Using prefix matching to invalidate: ["tasks", user, role] and ["my-tasks", user]
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["my-tasks"] });
     },
     onError: (error: unknown) => {
       const message =
@@ -140,7 +131,7 @@ export function UpdateTaskDialog({
 
   const statusOptions = [
     { value: "Todo", label: "Todo" },
-    { value: "In_Progress", label: "In‑Progress" },
+    { value: "In_Progress", label: "In-Progress" },
     { value: "Completed", label: "Completed" },
   ];
 
@@ -155,7 +146,7 @@ export function UpdateTaskDialog({
       <DialogTrigger asChild>
         <button
           className="w-10 h-10 flex items-center justify-center rounded-full text-secondary-foreground hover:bg-muted-foreground transition-colors duration-200"
-          title="Edit Project"
+          title="Edit Task"
         >
           <svg
             className="w-5 h-5"

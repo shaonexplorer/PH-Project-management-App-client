@@ -82,6 +82,8 @@ export function SheetCreateTask() {
       setOpen(false);
       toast.success("Task created successfully");
 
+      // Invalidate task queries - both Kanban and dashboard patterns
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["my-tasks"] });
       hasShownDialogRef.current = false; // Reset for next time
     },

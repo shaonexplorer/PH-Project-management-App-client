@@ -33,7 +33,8 @@ export function DeleteTaskConfirmDialog({
     onSuccess: () => {
       toast.success("Task deleted successfully");
       setOpen(false);
-      // Invalidate any task list queries so UI refreshes.
+      // Invalidate task queries - both Kanban and dashboard patterns
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["my-tasks"] });
     },
     onError: (error: unknown) => {
