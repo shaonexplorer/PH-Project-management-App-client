@@ -25,8 +25,8 @@ import {
   ComboboxItem,
   ComboboxEmpty,
 } from "@/components/ui/combobox";
-import { UserPlus, AlertCircle } from "lucide-react";
-import { getTeamMembers, getTeamMembersByProject } from "@/actions/team-member";
+import { AlertCircle } from "lucide-react";
+import { getMembersByProjectManager } from "@/actions/team-member";
 import {
   addNewProjectMember,
   addOldProjectMember,
@@ -34,6 +34,14 @@ import {
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { getProjectById } from "@/actions/Project/get";
+
+interface TeamMember {
+  id: string;
+  name: string;
+  email: string;
+  label: string;
+}
 
 // Schemas
 const newMemberSchema = z.object({
@@ -60,19 +68,39 @@ export function AddMemberToProjectDialog({
   onMemberAdded,
 }: AddMemberToProjectDialogProps) {
   const [activeTab, setActiveTab] = useState<"existing" | "new">("existing");
+  const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
 
-  const teamMembers = useQuery({
-    queryKey: ["team-member", projectId],
-    queryFn: () => getTeamMembersByProject(projectId),
+  // Fetch the project to get the creator (Project Manager)
+  const project = useQuery({
+    queryKey: ["project", projectId],
+    queryFn: () => getProjectById(projectId),
+    enabled: open, // Only fetch when dialog is open
   });
 
-  const allMembers = teamMembers?.data?.members.map(
-    (m: { user: { id: string; name: string; email: string } }) => ({
-      id: m.user.id,
-      name: m.user.name,
-      email: m.user.email,
-    }),
-  );
+  // Get Project Manager ID from the project
+  const projectManagerId = project.data?.project?.createdBy;
+
+  // Fetch available members (members under the Project Manager, excluding current project)
+  const availableMembers = useQuery({
+    queryKey: ["available-members", projectManagerId, projectId],
+    queryFn: () => {
+      if (!projectManagerId) return { members: [] };
+      return getMembersByProjectManager(projectManagerId, projectId);
+    },
+    enabled: !!projectManagerId, // Only fetch when we have a Project Manager ID
+  });
+
+  const allMembers: TeamMember[] =
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    availableMembers?.data?.members?.map((m: any) => {
+      const member = m?.member || m;
+      return {
+        id: member?.id || m?.id,
+        name: member?.name || m?.name || "",
+        email: member?.email || m?.email || "",
+        label: `${member?.name || m?.name || ""} (${member?.email || m?.email || ""})`,
+      };
+    }) || [];
 
   const {
     register: registerNew,
@@ -85,18 +113,16 @@ export function AddMemberToProjectDialog({
   });
 
   const {
-    register: registerExisting,
     handleSubmit: handleExistingSubmit,
     formState: { errors: existingErrors },
     reset: resetExisting,
     setValue,
-    watch,
   } = useForm({
     resolver: zodResolver(existingMemberSchema),
     defaultValues: { userId: "" },
   });
 
-  const selectedUserId = watch("userId");
+  // const selectedUserId = watch("userId");
 
   const queryClient = useQueryClient();
 
@@ -155,6 +181,12 @@ export function AddMemberToProjectDialog({
     resetExisting();
   };
 
+  const handleSelectMember = (member: TeamMember) => {
+    // Stop propagation to prevent dialog close
+    setSelectedMember(member);
+    setValue("userId", member.id);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -205,44 +237,65 @@ export function AddMemberToProjectDialog({
               className="space-y-4"
             >
               <div className="grid gap-2">
-                <Label htmlFor="existing-member" className="sr-only">
-                  Select Member
-                </Label>
+                <Label htmlFor="existing-member">Team Member</Label>
                 <Combobox
-                  value={selectedUserId ?? ""}
+                  items={allMembers}
+                  value={selectedMember?.name ?? ""}
                   onValueChange={(value) => {
-                    setValue("userId", value as string);
+                    if (value) {
+                      const member = allMembers.find((m) => m.name === value);
+                      if (member) {
+                        handleSelectMember(member);
+                      }
+                    }
+                  }}
+                  itemToStringValue={(item) => {
+                    if (!item) return "";
+                    if (typeof item === "string") return item;
+                    return (item as TeamMember).name;
+                  }}
+                  filter={(item, query) => {
+                    if (typeof item === "string") {
+                      return item.toLowerCase().includes(query.toLowerCase());
+                    }
+                    const member = item as TeamMember;
+                    const str = member.name.toLowerCase();
+                    const email = member.email?.toLowerCase() || "";
+                    return (
+                      str.includes(query.toLowerCase()) ||
+                      email.includes(query.toLowerCase())
+                    );
                   }}
                 >
-                  <ComboboxInput id="existing-member" placeholder="Select a member" />
-                  <ComboboxContent>
-                    <ComboboxEmpty>No members found</ComboboxEmpty>
+                  <ComboboxInput placeholder="Search by name or email..." />
+                  <ComboboxContent className="pointer-events-auto!">
                     <ComboboxList>
-                      {allMembers?.map(
-                        (member: { id: string; name: string; email: string }) => (
-                          <ComboboxItem
-                            key={member.id}
-                            value={member.id}
-                          >
-                            <div className="flex flex-col">
-                              <span className="font-medium">{member.name}</span>
-                              <span className="text-sm text-muted-foreground">
-                                {member.email}
-                              </span>
-                            </div>
-                          </ComboboxItem>
-                        ),
+                      {(item) => (
+                        <ComboboxItem
+                          key={item.id}
+                          value={item.name}
+                          onSelect={() => handleSelectMember(item)}
+                        >
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium">
+                              {item.name}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {item.email}
+                            </span>
+                          </div>
+                        </ComboboxItem>
                       )}
                     </ComboboxList>
+                    <ComboboxEmpty>No members found.</ComboboxEmpty>
                   </ComboboxContent>
                 </Combobox>
-                <input type="hidden" {...registerExisting("userId")} />
+                {existingErrors.userId && (
+                  <p className="text-sm text-destructive">
+                    {existingErrors.userId.message}
+                  </p>
+                )}
               </div>
-              {existingErrors.userId && (
-                <p className="text-sm text-red-500">
-                  {existingErrors.userId.message}
-                </p>
-              )}
             </form>
           )}
 

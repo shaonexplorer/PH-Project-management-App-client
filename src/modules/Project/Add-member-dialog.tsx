@@ -85,7 +85,17 @@ export function DialogAddMember({ projectId }: { projectId: string }) {
     enabled: !!projectManagerId, // Only fetch when we have a Project Manager ID
   });
 
-  const allMembers: TeamMember[] = availableMembers?.data?.members || [];
+  const allMembers: TeamMember[] =
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    availableMembers?.data?.members?.map((m: any) => {
+      const member = m?.member || m;
+      return {
+        id: member?.id || m?.id,
+        name: member?.name || m?.name || "",
+        email: member?.email || m?.email || "",
+        label: `${member?.name || m?.name || ""} (${member?.email || m?.email || ""})`,
+      };
+    }) || [];
 
   // Form for adding a new member
   const formNew = useForm<z.infer<typeof newMemberSchema>>({
@@ -213,12 +223,23 @@ export function DialogAddMember({ projectId }: { projectId: string }) {
                     if (typeof item === "string") return item;
                     return (item as TeamMember).name;
                   }}
+                  filter={(item, query) => {
+                    if (typeof item === "string") {
+                      return item.toLowerCase().includes(query.toLowerCase());
+                    }
+                    const member = item as TeamMember;
+                    const str = member.name.toLowerCase();
+                    const email = member.email?.toLowerCase() || "";
+                    return (
+                      str.includes(query.toLowerCase()) ||
+                      email.includes(query.toLowerCase())
+                    );
+                  }}
                 >
                   <ComboboxInput placeholder="Search by name or email..." />
                   <ComboboxContent className="pointer-events-auto!">
-                    <ComboboxEmpty>No members found.</ComboboxEmpty>
                     <ComboboxList>
-                      {allMembers.map((item) => (
+                      {(item) => (
                         <ComboboxItem
                           key={item.id}
                           value={item.name}
@@ -233,8 +254,9 @@ export function DialogAddMember({ projectId }: { projectId: string }) {
                             </span>
                           </div>
                         </ComboboxItem>
-                      ))}
+                      )}
                     </ComboboxList>
+                    <ComboboxEmpty>No members found.</ComboboxEmpty>
                   </ComboboxContent>
                 </Combobox>
                 {formExisting.formState.errors.userId && (
