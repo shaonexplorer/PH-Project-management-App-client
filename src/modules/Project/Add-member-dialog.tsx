@@ -35,7 +35,11 @@ import {
   addNewProjectMember,
   addOldProjectMember,
 } from "@/actions/Project/add-member";
-import { getTeamMembersByProject } from "@/actions/team-member";
+import {
+  getTeamMembersByProject,
+  getMembersByProjectManager,
+} from "@/actions/team-member";
+import { getProjectById } from "@/actions/Project/get";
 
 // Schema for adding a new member
 const newMemberSchema = z.object({
@@ -61,23 +65,27 @@ export function DialogAddMember({ projectId }: { projectId: string }) {
   const [open, setOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
 
-  // Fetch team members for the "Add Existing" tab
-  const teamMembers = useQuery({
-    queryKey: ["team-members", projectId],
-    queryFn: () => getTeamMembersByProject(projectId),
+  // Fetch the project to get the creator (Project Manager)
+  const project = useQuery({
+    queryKey: ["project", projectId],
+    queryFn: () => getProjectById(projectId),
+    enabled: open, // Only fetch when dialog is open
   });
 
-  console.log("teamMembers", teamMembers.data?.members);
+  // Get Project Manager ID from the project
+  const projectManagerId = project.data?.project?.createdBy;
 
-  const allMembers: TeamMember[] =
-    teamMembers?.data?.members.map(
-      (m: { user: { id: string; name: string; email: string } }) => ({
-        id: m.user.id,
-        name: m.user.name,
-        email: m.user.email,
-        label: `${m.user.name} (${m.user.email})`,
-      }),
-    ) || [];
+  // Fetch available members (members under the Project Manager, excluding current project)
+  const availableMembers = useQuery({
+    queryKey: ["available-members", projectManagerId, projectId],
+    queryFn: () => {
+      if (!projectManagerId) return { members: [] };
+      return getMembersByProjectManager(projectManagerId, projectId);
+    },
+    enabled: !!projectManagerId, // Only fetch when we have a Project Manager ID
+  });
+
+  const allMembers: TeamMember[] = availableMembers?.data?.members || [];
 
   // Form for adding a new member
   const formNew = useForm<z.infer<typeof newMemberSchema>>({
@@ -134,7 +142,9 @@ export function DialogAddMember({ projectId }: { projectId: string }) {
       setOpen(false);
       toast.success("Member added successfully");
       formExisting.reset();
-      queryClient.invalidateQueries({ queryKey: ["my-projects"] });
+      queryClient.invalidateQueries({
+        queryKey: ["available-members", projectManagerId, projectId],
+      });
     },
     onError: (error: unknown) => {
       const message =
